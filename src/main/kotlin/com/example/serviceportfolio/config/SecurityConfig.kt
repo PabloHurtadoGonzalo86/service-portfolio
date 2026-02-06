@@ -2,8 +2,12 @@ package com.example.serviceportfolio.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.web.SecurityFilterChain
 
 
@@ -11,6 +15,13 @@ import org.springframework.security.web.SecurityFilterChain
 @EnableWebSecurity
 class SecurityConfig {
 
+    @Bean
+    fun authorizedClientService(
+        jdbcTemplate: JdbcTemplate,
+        clientRegistrationRepository: ClientRegistrationRepository
+    ): OAuth2AuthorizedClientService {
+        return JdbcOAuth2AuthorizedClientService(jdbcTemplate, clientRegistrationRepository)
+    }
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {

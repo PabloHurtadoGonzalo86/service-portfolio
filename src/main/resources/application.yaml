@@ -10,6 +10,7 @@ spring:
           model: gpt-5.2
           temperature: 0.2
           max-tokens: 8192
+  # --- Spring Security OAuth2 ---
   security:
     oauth2:
       client:
@@ -20,3 +21,18 @@ spring:
             scope:
               - read:user
               - repo
+  # --- Database ---
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:serviceportfolio}
+    username: ${DB_USERNAME:serviceportfolio}
+    password: ${DB_PASSWORD:serviceportfolio}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      mode: always
