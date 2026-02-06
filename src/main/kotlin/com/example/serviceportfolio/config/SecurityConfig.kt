@@ -22,7 +22,7 @@ class SecurityConfig {
                     .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
             }
-            .oauth2Login { }  // Configura login con OAuth2 (GitHub)
+            //.oauth2Login { }  // Configura login con OAuth2 (GitHub)
             .csrf { it.disable() }  // Para API REST stateless
         return http.build()
     }
