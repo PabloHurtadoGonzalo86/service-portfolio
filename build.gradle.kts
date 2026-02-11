@@ -19,6 +19,7 @@ configurations.all {}
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.jenkins-ci.org/releases/") }
 }
 
 extra["springAiVersion"] = "2.0.0-M2"
