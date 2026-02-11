@@ -2,9 +2,9 @@ package com.example.serviceportfolio.client
 
 import com.example.serviceportfolio.config.GitHubAppProperties
 import org.kohsuke.github.GitHubBuilder
+import org.kohsuke.github.extras.authorization.JWTTokenProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Instant
 
@@ -29,20 +29,21 @@ class GitHubAppTokenService(
     }
 
     private fun refreshToken(): String {
-        val privateKeyContent = Files.readString(Path.of(properties.privateKeyPath))
+        // Crear JWTTokenProvider: genera el JWT automaticamente a partir del appId + clave privada
+        val jwtProvider = JWTTokenProvider(properties.appId.toString(), Path.of(properties.privateKeyPath))
 
-        // Conectar como GitHub App usando JWT
+        // Conectar como GitHub App usando el JWTTokenProvider
         val appGitHub = GitHubBuilder()
-            .withJwtToken(properties.appId.toString(), privateKeyContent)
+            .withAuthorizationProvider(jwtProvider)
             .build()
 
         // Obtener la instalacion y crear token
         val installation = appGitHub.app.getInstallationById(properties.installationId)
         val token = installation.createToken().create()
 
-        // Cachear
+        // Cachear - getExpiresAt() ya devuelve Instant directamente
         cachedToken = token.token
-        tokenExpiresAt = token.expiresAt.toInstant()
+        tokenExpiresAt = token.expiresAt
 
         logger.info("GitHub App installation token generated, expires at: {}", tokenExpiresAt)
         return cachedToken!!
