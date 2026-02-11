@@ -1,6 +1,6 @@
 package com.example.serviceportfolio.services
 
-import com.example.serviceportfolio.dtos.RepoContext
+import com.example.serviceportfolio.entities.RepoContext
 import com.example.serviceportfolio.exceptions.GitHubApiException
 import com.example.serviceportfolio.exceptions.InvalidRepoUrlException
 import com.example.serviceportfolio.exceptions.RepoNotFoundException

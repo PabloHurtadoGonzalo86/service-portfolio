@@ -1,4 +1,4 @@
-package com.example.serviceportfolio.dtos
+package com.example.serviceportfolio.entities
 
 data class RepoContext(
     val name: String,
