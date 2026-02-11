@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration
 class GitHubConfig {
 
     @Bean
-    fun github(tokenService: GitHubAppTokenService) = GitHub {
-        return GitHubBuilder().withAppInstallationToken(tokenService.getInstallationToken()).build()
+    fun gitHub(tokenService: GitHubAppTokenService): GitHub {
+        return GitHubBuilder()
+            .withAppInstallationToken(tokenService.getInstallationToken())
+            .build()
     }
 }

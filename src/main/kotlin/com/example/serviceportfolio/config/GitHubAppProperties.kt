@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component
 data class GitHubAppProperties(
     val appId: Long,
     val installationId: Long,
-    val privateKey: String
+    val privateKeyPath: String
 )
