@@ -46,10 +46,10 @@ class AiAnalysisService(
         appendLine("Analiza el siguiente repositorio y proporciona una breve " +
                 "descripción del proyecto, la pila tecnológica utilizada, " +
                 "las características detectadas y el contenido del README en formato Markdown." +
-                "Piensa que esto servira para el frontend de un repositorio de una persona , asi que aparte tienes que seleccionar los " +
-                "repositorios de esta persona , que contengan tecnologias diferentes y proporcionar la un alista , con todo esto " +
-                "y una descripcion , que contenga todo lo tecnico que tengan estos repositorios, de tal manera que " +
-                "cuando un recrutier lo vea , llame la atención , para potenciar una posible contratación , para una oferta del sector")
+                "Piensa que esto servirá para el frontend de un repositorio de una persona , asi que aparte tienes que seleccionar los " +
+                "repositorios de esta persona , que contengan tecnologías diferentes y proporcionar la un alista , con todo esto " +
+                "y una descripción , que contenga todo lo técnico que tengan estos repositorios, de tal manera que " +
+                "cuando un recruiter lo vea , llame la atención , para potenciar una posible contratación , para una oferta del sector")
         appendLine()
 
         //Metadata
