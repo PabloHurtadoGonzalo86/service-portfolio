@@ -1,11 +1,12 @@
 package com.example.serviceportfolio.services
 
+import com.example.serviceportfolio.client.GitHubAppTokenService
 import com.example.serviceportfolio.models.RepoContext
 import com.example.serviceportfolio.exceptions.GitHubApiException
 import com.example.serviceportfolio.exceptions.InvalidRepoUrlException
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import org.kohsuke.github.GHFileNotFoundException
-import org.kohsuke.github.GitHub
+import org.kohsuke.github.GitHubBuilder
 import org.kohsuke.github.HttpException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -13,7 +14,7 @@ import java.io.IOException
 
 @Service
 class GitHubRepoService(
-    private val gitHub: GitHub
+    private val tokenService: GitHubAppTokenService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -44,6 +45,10 @@ class GitHubRepoService(
         logger.info("Fetching repo context for {}/{}", owner, repo)
 
         try {
+            val gitHub = GitHubBuilder()
+                .withAppInstallationToken(tokenService.getInstallationToken())
+                .build()
+
             val repository = gitHub.getRepository("$owner/$repo")
 
             val name = repository.name

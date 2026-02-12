@@ -32,6 +32,8 @@ class AiAnalysisService(
 
             return analysis
 
+        } catch (e: AiAnalysisException) {
+            throw e
         } catch (e: Exception) {
             logger.error("Error al analizar repositorio {}: {}", repoContext.name, e.message, e)
             throw AiAnalysisException(
