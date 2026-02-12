@@ -2,12 +2,14 @@
 
 ## Qué es este Proyecto
 
-API REST en Spring Boot que analiza repositorios de GitHub y genera automáticamente:
-1. **Descripción profesional** del proyecto (para CV/portfolio)
-2. **README.md completo** con IA (badges, instalación, uso, etc.)
-3. **Commit automático** del README al repositorio del usuario
+API REST en Spring Boot que genera portfolios profesionales para desarrolladores a partir de su perfil de GitHub:
+1. **Portfolio completo** - Escanea todos los repos de un usuario, la IA selecciona los mejores y genera un portfolio profesional
+2. **Analisis individual de repos** - Analiza un repo y genera README.md con IA
+3. **Commit automatico** del README al repositorio del usuario
 
-El usuario pasa una URL de GitHub → la API lee el repo → Spring AI (GPT-4.1) analiza el código → devuelve documentación generada → opcionalmente hace commit del README.
+Dos flujos principales:
+- Portfolio: Username de GitHub → lee TODOS los repos → IA genera portfolio con proyectos seleccionados, skills, y resumen profesional
+- Repo individual: URL de GitHub → lee repo → Spring AI analiza → genera README → opcionalmente hace commit
 
 ## Stack Técnico
 
@@ -30,23 +32,25 @@ El usuario pasa una URL de GitHub → la API lee el repo → Spring AI (GPT-4.1)
 
 ```
 controller/
+├── PortfolioController   → POST /portfolio/generate, GET /portfolio, GET /portfolio/{id}
 ├── AnalysisController    → POST /analyze, GET /analyses, GET /analyses/{id}, POST /readme/commit
 └── HomeController        → GET / (health check)
 services/
-├── GitHubRepoService     → Lectura de repos con hub4j (GitHub App token)
-├── AiAnalysisService     → Análisis con Spring AI ChatClient (Structured Output)
+├── PortfolioGenerationService → Orquestacion del flujo de portfolio (repos + IA + persistencia)
+├── GitHubRepoService     → Lectura de repos con hub4j (getRepoContext + listUserRepos)
+├── AiAnalysisService     → Analisis con Spring AI (analyze repo + generatePortfolio)
 └── ReadmeCommitService   → Commit del README al repo del usuario (OAuth token)
 client/
-└── GitHubAppTokenService → Gestión de tokens de GitHub App (JWT → installation token)
+└── GitHubAppTokenService → Gestion de tokens de GitHub App (JWT → installation token)
 config/
 ├── AiConfig              → Bean ChatClient de Spring AI
 ├── GitHubConfig          → Bean GitHub (hub4j) con GitHub App
 ├── GitHubAppProperties   → @ConfigurationProperties para GitHub App
 └── SecurityConfig        → Spring Security + OAuth2 + CORS configurable
-dtos/                 → AnalyzeRepoRequest, AnalysisResponse, ReadmeCommitRequest, ReadmeCommitResponse
-models/               → RepoAnalysis, RepoContext
-entities/             → AnalysisResult (JPA entity)
-repositories/         → AnalysisResultRepository (Spring Data JPA)
+dtos/                 → Request/Response DTOs (Analyze, Portfolio, ReadmeCommit)
+models/               → RepoAnalysis, RepoContext, DeveloperPortfolio, PortfolioProject, RepoSummary
+entities/             → AnalysisResult, Portfolio (JPA entities)
+repositories/         → AnalysisResultRepository, PortfolioRepository
 util/                 → GitHubUrlParser (parsing de URLs de GitHub)
 exceptions/           → GlobalExceptionHandler + excepciones custom
 ```
@@ -55,7 +59,10 @@ exceptions/           → GlobalExceptionHandler + excepciones custom
 
 | Método | Ruta | Auth | Descripción |
 |--------|------|------|-------------|
-| POST | `/api/v1/repos/analyze` | Público | Analiza repo y genera README |
+| POST | `/api/v1/portfolio/generate` | Público | Genera portfolio completo desde username de GitHub |
+| GET | `/api/v1/portfolio` | Público | Lista todos los portfolios generados |
+| GET | `/api/v1/portfolio/{id}` | Público | Obtiene un portfolio por ID |
+| POST | `/api/v1/repos/analyze` | Público | Analiza repo individual y genera README |
 | GET | `/api/v1/repos/analyses` | Público | Lista todos los análisis guardados |
 | GET | `/api/v1/repos/analyses/{id}` | Público | Obtiene un análisis por ID |
 | POST | `/api/v1/repos/readme/commit` | OAuth | Hace commit del README al repo del usuario |
@@ -64,11 +71,20 @@ exceptions/           → GlobalExceptionHandler + excepciones custom
 ## Flujo de Datos
 
 ```
+Flujo Portfolio:
+Usuario → POST /portfolio/generate { githubUsername }
+  → GitHubRepoService.listUserRepos: lista todos los repos publicos (filtra forks/archived)
+  → AiAnalysisService.generatePortfolio: prompt con todos los repos → IA selecciona los mejores
+  → Persiste en DB como JSON
+  → Devuelve: { developerName, professionalSummary, selectedProjects[], skillsByCategory, ... }
+
+Flujo Analisis Individual:
 Usuario → POST /analyze { repoUrl }
-  → GitHubRepoService: lee metadatos + árbol de archivos + contenido clave
-  → AiAnalysisService: construye prompt → ChatClient → Structured Output
+  → GitHubRepoService.getRepoContext: lee metadatos + arbol de archivos + contenido clave
+  → AiAnalysisService.analyze: construye prompt → ChatClient → Structured Output
   → Devuelve: { projectName, description, readmeContent, metadata }
 
+Flujo Commit:
 Usuario → POST /readme/commit { repoUrl, readmeContent } + OAuth token
   → ReadmeCommitService: commit al repo usando token OAuth del usuario
   → Devuelve: { commitSha, commitUrl }
@@ -114,12 +130,13 @@ Usuario → POST /readme/commit { repoUrl, readmeContent } + OAuth token
 ## Estado Actual
 
 Backend API completado con todas las funcionalidades core:
-- Endpoint de análisis de repos con IA (Spring AI + OpenAI GPT-4.1)
-- Persistencia de análisis en PostgreSQL (Spring Data JPA)
-- Commit automático de README al repo del usuario (hub4j + OAuth)
-- Autenticación doble: GitHub App (lectura) + OAuth App (escritura)
+- Generacion de portfolio profesional desde perfil GitHub completo (IA selecciona mejores repos)
+- Analisis individual de repos con IA (Spring AI + OpenAI GPT-4.1)
+- Persistencia de portfolios y analisis en PostgreSQL (Spring Data JPA)
+- Commit automatico de README al repo del usuario (hub4j + OAuth)
+- Autenticacion doble: GitHub App (lectura) + OAuth App (escritura)
 - CORS configurable por entorno
-- 22 tests (unit + controller) pasando
+- 29 tests (unit + controller) pasando
 - CI/CD con GitHub Actions, Docker, y manifiestos Kubernetes
 - Desplegado en: `serviceportfolioapi.pablohgdev.com`
 

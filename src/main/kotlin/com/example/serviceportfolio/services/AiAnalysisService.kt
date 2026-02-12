@@ -1,8 +1,10 @@
 package com.example.serviceportfolio.services
 
 import com.example.serviceportfolio.exceptions.AiAnalysisException
+import com.example.serviceportfolio.models.DeveloperPortfolio
 import com.example.serviceportfolio.models.RepoAnalysis
 import com.example.serviceportfolio.models.RepoContext
+import com.example.serviceportfolio.models.RepoSummary
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.stereotype.Service
@@ -118,4 +120,81 @@ class AiAnalysisService(
         appendLine("5. **readmeMarkdown**: README.md completo con badges, instalación, uso, estructura")
     }
 
+    fun generatePortfolio(username: String, repos: List<RepoSummary>): DeveloperPortfolio {
+        logger.info("Generating portfolio for GitHub user: {}", username)
+
+        try {
+            val prompt = buildPortfolioPrompt(username, repos)
+
+            val portfolio = chatClient
+                .prompt()
+                .user(prompt)
+                .call()
+                .entity(DeveloperPortfolio::class.java)
+                ?: throw AiAnalysisException("AI did not return a valid portfolio for $username")
+
+            logger.info("Portfolio generated for {}. Selected {} projects, top skills: {}",
+                username, portfolio.selectedProjects.size, portfolio.topSkills.take(5).joinToString(", "))
+
+            return portfolio
+
+        } catch (e: AiAnalysisException) {
+            throw e
+        } catch (e: Exception) {
+            logger.error("Error generating portfolio for {}: {}", username, e.message, e)
+            throw AiAnalysisException("Failed to generate portfolio for $username", e)
+        }
+    }
+
+    private fun buildPortfolioPrompt(username: String, repos: List<RepoSummary>): String = buildString {
+        appendLine("Eres un experto en analisis de perfiles de desarrollador y creacion de portfolios tecnicos profesionales.")
+        appendLine()
+        appendLine("Analiza los siguientes repositorios publicos del usuario de GitHub '$username' y genera un portfolio profesional.")
+        appendLine("El objetivo es que un recruiter del sector tech vea este portfolio y quede impresionado por las habilidades tecnicas del desarrollador.")
+        appendLine()
+        appendLine("## Instrucciones")
+        appendLine()
+        appendLine("1. **developerName**: Nombre profesional del desarrollador (usa el username si no hay mas informacion)")
+        appendLine()
+        appendLine("2. **professionalSummary**: Escribe 2-3 parrafos detallados que describan al desarrollador como profesional.")
+        appendLine("   - Menciona su experiencia con diferentes tecnologias y stacks")
+        appendLine("   - Describe los patrones y buenas practicas que se observan en sus proyectos")
+        appendLine("   - Destaca que tipo de problemas resuelve y en que dominios trabaja")
+        appendLine("   - El tono debe ser profesional, tecnico y atractivo para un recruiter")
+        appendLine()
+        appendLine("3. **selectedProjects**: Selecciona los 6-10 repositorios mas representativos e interesantes.")
+        appendLine("   - Prioriza DIVERSIDAD tecnologica (no elegir 5 proyectos del mismo stack)")
+        appendLine("   - Para cada proyecto:")
+        appendLine("     - **repoName**: Nombre exacto del repositorio (tal como aparece abajo)")
+        appendLine("     - **repoUrl**: URL exacta del repositorio (tal como aparece abajo)")
+        appendLine("     - **description**: 2 parrafos detallados explicando que hace el proyecto, que problemas resuelve, que arquitectura usa, y que decisiones tecnicas interesantes tiene")
+        appendLine("     - **techStack**: Lista de tecnologias especificas usadas (inferidas del lenguaje y descripcion)")
+        appendLine("     - **whyNotable**: Una frase explicando por que este proyecto destaca en el portfolio")
+        appendLine("     - **category**: Una de: Backend, Frontend, Full-Stack, DevOps, Data, Mobile, Library, Tool, Other")
+        appendLine()
+        appendLine("4. **topSkills**: Las 10-15 tecnologias/habilidades principales, ordenadas por relevancia y dominio aparente")
+        appendLine()
+        appendLine("5. **skillsByCategory**: Agrupa TODAS las tecnologias detectadas en categorias como:")
+        appendLine("   Languages, Frameworks, Databases, DevOps, Cloud, Testing, Tools, etc.")
+        appendLine()
+        appendLine("6. **profileHighlights**: 3-5 puntos clave que un recruiter deberia notar")
+        appendLine("   (ej: 'Desarrollador full-stack con proyectos en 5 lenguajes diferentes')")
+        appendLine()
+        appendLine("## Repositorios del desarrollador")
+        appendLine()
+        appendLine("Username: $username")
+        appendLine("Total repositorios publicos (no fork, no archived): ${repos.size}")
+        appendLine()
+
+        repos.forEachIndexed { index, repo ->
+            appendLine("### ${index + 1}. ${repo.name}")
+            appendLine("- URL: ${repo.url}")
+            appendLine("- Lenguaje principal: ${repo.primaryLanguage ?: "No especificado"}")
+            appendLine("- Stars: ${repo.stars} | Forks: ${repo.forks}")
+            if (repo.description != null) {
+                appendLine("- Descripcion: ${repo.description}")
+            }
+            appendLine()
+        }
+    }
 }

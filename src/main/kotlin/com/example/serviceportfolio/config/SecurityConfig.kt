@@ -39,6 +39,7 @@ class SecurityConfig(
                     .requestMatchers("/api/v1/repos/analyze").permitAll()
                     .requestMatchers("/api/v1/repos/analyses").permitAll()
                     .requestMatchers("/api/v1/repos/analyses/{id}").permitAll()
+                    .requestMatchers("/api/v1/portfolio/**").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
                     .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()

@@ -2,6 +2,7 @@ package com.example.serviceportfolio.services
 
 import com.example.serviceportfolio.client.GitHubAppTokenService
 import com.example.serviceportfolio.models.RepoContext
+import com.example.serviceportfolio.models.RepoSummary
 import com.example.serviceportfolio.exceptions.GitHubApiException
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.util.GitHubUrlParser
@@ -21,6 +22,7 @@ class GitHubRepoService(
 
     companion object {
         private const val MAX_FILE_TREE_SIZE = 1000
+        private const val MAX_REPOS_FOR_PORTFOLIO = 50
         private val KEY_FILES = listOf(
             "package.json",
             "build.gradle.kts",
@@ -116,5 +118,40 @@ class GitHubRepoService(
         }
 
         return result
+    }
+
+    fun listUserRepos(username: String): List<RepoSummary> {
+        logger.info("Listing repositories for user: {}", username)
+
+        try {
+            val gitHub = GitHubBuilder()
+                .withAppInstallationToken(tokenService.getInstallationToken())
+                .build()
+
+            val user = gitHub.getUser(username)
+
+            return user.getRepositories()
+                .values
+                .filter { !it.isArchived && !it.isFork }
+                .sortedByDescending { it.pushedAt }
+                .take(MAX_REPOS_FOR_PORTFOLIO)
+                .map { repo ->
+                    RepoSummary(
+                        name = repo.name,
+                        description = repo.description,
+                        primaryLanguage = repo.language,
+                        stars = repo.stargazersCount,
+                        forks = repo.forksCount,
+                        url = repo.htmlUrl.toString()
+                    )
+                }
+
+        } catch (e: GHFileNotFoundException) {
+            throw RepoNotFoundException("GitHub user not found: $username")
+        } catch (e: HttpException) {
+            throw GitHubApiException("GitHub API error while listing repos for $username: ${e.message}", cause = e)
+        } catch (e: IOException) {
+            throw GitHubApiException("Network error while listing repos: ${e.message}", cause = e)
+        }
     }
 }
