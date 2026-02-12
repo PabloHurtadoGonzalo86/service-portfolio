@@ -25,6 +25,7 @@ class AiAnalysisService(
                 .user(userPrompt)
                 .call()
                 .entity(RepoAnalysis::class.java)
+                ?: throw AiAnalysisException("La IA no devolvió un análisis válido para ${repoContext.name}")
 
             logger.info("Análisis completado para {}. Tech stack: {}",
                 repoContext.name, analysis.techStack.joinToString(", "))
@@ -41,7 +42,7 @@ class AiAnalysisService(
     }
 
 
-    private fun buildPrompt(repoContext: RepoContext): String = buildString {
+    private fun buildPrompt(context: RepoContext): String = buildString {
         appendLine("Analiza el siguiente repositorio y proporciona una breve " +
                 "descripción del proyecto, la pila tecnológica utilizada, " +
                 "las características detectadas y el contenido del README en formato Markdown." +
