@@ -2,14 +2,19 @@ package com.example.serviceportfolio.controller
 
 import com.example.serviceportfolio.dtos.AnalysisResponse
 import com.example.serviceportfolio.dtos.AnalyzeRepoRequest
+import com.example.serviceportfolio.dtos.ReadmeCommitRequest
+import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.repositories.AnalysisResultRepository
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
+import com.example.serviceportfolio.services.ReadmeCommitService
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,7 +22,8 @@ import org.springframework.web.bind.annotation.*
 class AnalysisController(
     private val gitHubRepoService: GitHubRepoService,
     private val aiAnalysisService: AiAnalysisService,
-    private val analysisResultRepository: AnalysisResultRepository
+    private val analysisResultRepository: AnalysisResultRepository,
+    private val readmeCommitService: ReadmeCommitService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -54,6 +60,20 @@ class AnalysisController(
         val result = analysisResultRepository.findById(id)
             .orElseThrow { RepoNotFoundException("Analysis not found with id: $id") }
         return ResponseEntity.ok(result.toResponse())
+    }
+
+    @PostMapping("/readme/commit")
+    fun commitReadme(
+        @Valid @RequestBody request: ReadmeCommitRequest,
+        @RegisteredOAuth2AuthorizedClient("github") authorizedClient: OAuth2AuthorizedClient
+    ): ResponseEntity<ReadmeCommitResponse> {
+        logger.info("Solicitud de commit de README recibida para: {}", request.repoUrl)
+
+        val token = authorizedClient.accessToken.tokenValue
+        val response = readmeCommitService.commitReadme(request.repoUrl, request.readmeContent, token)
+
+        logger.info("README committed exitosamente, sha: {}", response.commitSha)
+        return ResponseEntity.ok(response)
     }
 
     private fun AnalysisResult.toResponse() = AnalysisResponse(

@@ -10,3 +10,5 @@ class InvalidRepoAnalysisException(message: String) : RuntimeException(message)
 class GitHubApiException(message: String, cause: Throwable? = null) : RuntimeException(message , cause)
 
 class AiAnalysisException(message: String, cause: Throwable? = null) : RuntimeException(message , cause)
+
+class ReadmeCommitException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

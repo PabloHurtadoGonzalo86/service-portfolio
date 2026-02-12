@@ -3,8 +3,8 @@ package com.example.serviceportfolio.services
 import com.example.serviceportfolio.client.GitHubAppTokenService
 import com.example.serviceportfolio.models.RepoContext
 import com.example.serviceportfolio.exceptions.GitHubApiException
-import com.example.serviceportfolio.exceptions.InvalidRepoUrlException
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
+import com.example.serviceportfolio.util.GitHubUrlParser
 import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHubBuilder
 import org.kohsuke.github.HttpException
@@ -20,9 +20,6 @@ class GitHubRepoService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
-        private val GITHUB_URL_REGEX = Regex(
-            """^(?:https?://)?(?:www\.)?github\.com/([^/]+)/([^/]+?)(?:\.git)?/?$"""
-        )
         private const val MAX_FILE_TREE_SIZE = 1000
         private val KEY_FILES = listOf(
             "package.json",
@@ -41,7 +38,7 @@ class GitHubRepoService(
     }
 
     fun getRepoContext(repoUrl: String): RepoContext {
-        val (owner, repo) = parseGitHubUrl(repoUrl)
+        val (owner, repo) = GitHubUrlParser.parse(repoUrl)
         logger.info("Fetching repo context for {}/{}", owner, repo)
 
         try {
@@ -76,15 +73,6 @@ class GitHubRepoService(
         } catch (e: IOException) {
             throw GitHubApiException("Network error while accessing GitHub: ${e.message}", cause = e)
         }
-    }
-
-    private fun parseGitHubUrl(url: String): Pair<String, String> {
-        val matchResult = GITHUB_URL_REGEX.matchEntire(url.trim())
-            ?: throw InvalidRepoUrlException("Invalid GitHub repository URL: $url")
-
-        val owner = matchResult.groupValues[1]
-        val repo = matchResult.groupValues[2]
-        return Pair(owner, repo)
     }
 
     private fun getFileTree(repository: org.kohsuke.github.GHRepository): List<String> {

@@ -39,6 +39,13 @@ class GlobalExceptionHandler {
         return problem
     }
 
+    @ExceptionHandler(ReadmeCommitException::class)
+    fun handleReadmeCommit(ex: ReadmeCommitException): ProblemDetail {
+        val problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, ex.message ?: "Failed to commit README")
+        problem.title = "README Commit Error"
+        return problem
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ProblemDetail {
         val errors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
