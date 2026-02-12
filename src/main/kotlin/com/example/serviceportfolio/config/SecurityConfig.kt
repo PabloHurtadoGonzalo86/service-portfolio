@@ -9,6 +9,9 @@ import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientServ
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 
 @Configuration
@@ -26,6 +29,7 @@ class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
+            .cors { it.configurationSource(corsConfigurationSource()) }
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/api/v1/repos/analyze").permitAll()
@@ -33,9 +37,21 @@ class SecurityConfig {
                     .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
             }
-            .oauth2Login { }  // Configura login con OAuth2 (GitHub)
-            .csrf { it.disable() }  // Para API REST stateless
+            .oauth2Login { }
+            .csrf { it.disable() }
         return http.build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = listOf("*")  // TODO: restringir en producción
+        configuration.allowedMethods = listOf("GET", "POST", "OPTIONS")
+        configuration.allowedHeaders = listOf("Content-Type", "Authorization")
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/api/**", configuration)
+        return source
     }
 
 }
