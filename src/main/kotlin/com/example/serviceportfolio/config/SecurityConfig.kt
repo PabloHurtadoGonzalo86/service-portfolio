@@ -1,5 +1,6 @@
 package com.example.serviceportfolio.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
@@ -16,7 +17,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    @Value("\${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
+    private val allowedOrigins: List<String>
+) {
 
     @Bean
     fun authorizedClientService(
@@ -47,9 +51,10 @@ class SecurityConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("*")  // TODO: restringir en producción
+        configuration.allowedOrigins = allowedOrigins
         configuration.allowedMethods = listOf("GET", "POST", "OPTIONS")
         configuration.allowedHeaders = listOf("Content-Type", "Authorization")
+        configuration.allowCredentials = true
 
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/api/**", configuration)
