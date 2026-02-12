@@ -5,5 +5,5 @@ data class RepoAnalysis(
     val shortDescription: String,
     val techStack: List<String>,
     val detectedFeatures: List<String>,
-    val readmeMarkdown: String? = null
+    val readmeMarkdown: String
 )
