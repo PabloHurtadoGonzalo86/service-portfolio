@@ -6,9 +6,12 @@ import com.example.serviceportfolio.dtos.ReadmeCommitRequest
 import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
+import com.example.serviceportfolio.exceptions.RateLimitExceededException
 import com.example.serviceportfolio.repositories.AnalysisResultRepository
 import com.example.serviceportfolio.services.AiAnalysisService
+import com.example.serviceportfolio.services.AuthenticationService
 import com.example.serviceportfolio.services.GitHubRepoService
+import com.example.serviceportfolio.services.RateLimitService
 import com.example.serviceportfolio.services.ReadmeCommitService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -27,7 +30,9 @@ class AnalysisController(
     private val gitHubRepoService: GitHubRepoService,
     private val aiAnalysisService: AiAnalysisService,
     private val analysisResultRepository: AnalysisResultRepository,
-    private val readmeCommitService: ReadmeCommitService
+    private val readmeCommitService: ReadmeCommitService,
+    private val authenticationService: AuthenticationService,
+    private val rateLimitService: RateLimitService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -36,14 +41,34 @@ class AnalysisController(
     @ApiResponse(responseCode = "200", description = "Analysis completed successfully")
     @ApiResponse(responseCode = "400", description = "Invalid repository URL")
     @ApiResponse(responseCode = "404", description = "Repository not found")
+    @ApiResponse(responseCode = "429", description = "Rate limit exceeded")
     @PostMapping("/analyze")
     fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): ResponseEntity<AnalysisResponse> {
         logger.info("Solicitud de análisis recibida para: {}", request.repoUrl)
+        val currentUser = authenticationService.getCurrentUser()
+
+        val rateLimitKey = if (currentUser != null) {
+            "user:${currentUser.id}:analyze"
+        } else {
+            "anon:analyze:${request.repoUrl.hashCode()}"
+        }
+
+        // Rate limit: 20 requests per hour for authenticated users, 5 for anonymous
+        val allowed = if (currentUser != null) {
+            rateLimitService.tryConsume(rateLimitKey, capacity = 20, refillTokens = 20)
+        } else {
+            rateLimitService.tryConsume(rateLimitKey, capacity = 5, refillTokens = 5)
+        }
+
+        if (!allowed) {
+            throw RateLimitExceededException("Rate limit exceeded. Please try again later.")
+        }
 
         val repoContext = gitHubRepoService.getRepoContext(request.repoUrl)
         val analysis = aiAnalysisService.analyze(repoContext)
 
         val entity = AnalysisResult(
+            user = currentUser,
             repoUrl = request.repoUrl,
             projectName = analysis.projectName,
             shortDescription = analysis.shortDescription,
@@ -60,7 +85,12 @@ class AnalysisController(
     @Operation(summary = "List all analyses", description = "Returns all repository analyses ordered by creation date")
     @GetMapping("/analyses")
     fun listAnalyses(): ResponseEntity<List<AnalysisResponse>> {
-        val results = analysisResultRepository.findAllByOrderByCreatedAtDesc()
+        val currentUser = authenticationService.getCurrentUser()
+        val results = if (currentUser != null) {
+            analysisResultRepository.findAllByUserOrderByCreatedAtDesc(currentUser)
+        } else {
+            analysisResultRepository.findAllByOrderByCreatedAtDesc()
+        }
         return ResponseEntity.ok(results.map { it.toResponse() })
     }
 
@@ -69,8 +99,14 @@ class AnalysisController(
     @ApiResponse(responseCode = "404", description = "Analysis not found")
     @GetMapping("/analyses/{id}")
     fun getAnalysis(@PathVariable id: Long): ResponseEntity<AnalysisResponse> {
-        val result = analysisResultRepository.findById(id)
-            .orElseThrow { RepoNotFoundException("Analysis not found with id: $id") }
+        val currentUser = authenticationService.getCurrentUser()
+        val result = if (currentUser != null) {
+            analysisResultRepository.findByIdAndUser(id, currentUser)
+                ?: throw RepoNotFoundException("Analysis not found with id: $id")
+        } else {
+            analysisResultRepository.findById(id)
+                .orElseThrow { RepoNotFoundException("Analysis not found with id: $id") }
+        }
         return ResponseEntity.ok(result.toResponse())
     }
 

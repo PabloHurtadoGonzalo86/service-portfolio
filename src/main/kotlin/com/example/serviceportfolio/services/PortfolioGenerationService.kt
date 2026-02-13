@@ -15,13 +15,15 @@ class PortfolioGenerationService(
     private val gitHubRepoService: GitHubRepoService,
     private val aiAnalysisService: AiAnalysisService,
     private val portfolioRepository: PortfolioRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val authenticationService: AuthenticationService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun generate(githubUsername: String): PortfolioResponse {
         logger.info("Generating portfolio for: {}", githubUsername)
+        val currentUser = authenticationService.getCurrentUser()
 
         val repos = gitHubRepoService.listUserRepos(githubUsername)
         if (repos.isEmpty()) {
@@ -31,6 +33,7 @@ class PortfolioGenerationService(
         val portfolio = aiAnalysisService.generatePortfolio(githubUsername, repos)
 
         val entity = Portfolio(
+            user = currentUser,
             githubUsername = githubUsername,
             portfolioData = objectMapper.writeValueAsString(portfolio),
             totalPublicRepos = repos.size
@@ -42,14 +45,26 @@ class PortfolioGenerationService(
     }
 
     fun getById(id: Long): PortfolioResponse {
-        val entity = portfolioRepository.findById(id)
-            .orElseThrow { RepoNotFoundException("Portfolio not found with id: $id") }
+        val currentUser = authenticationService.getCurrentUser()
+        val entity = if (currentUser != null) {
+            portfolioRepository.findByIdAndUser(id, currentUser)
+                ?: throw RepoNotFoundException("Portfolio not found with id: $id")
+        } else {
+            portfolioRepository.findById(id)
+                .orElseThrow { RepoNotFoundException("Portfolio not found with id: $id") }
+        }
         val portfolio = objectMapper.readValue(entity.portfolioData, DeveloperPortfolio::class.java)
         return toResponse(entity, portfolio)
     }
 
     fun listAll(): List<PortfolioSummaryResponse> {
-        return portfolioRepository.findAllByOrderByCreatedAtDesc().map { entity ->
+        val currentUser = authenticationService.getCurrentUser()
+        val portfolios = if (currentUser != null) {
+            portfolioRepository.findAllByUserOrderByCreatedAtDesc(currentUser)
+        } else {
+            portfolioRepository.findAllByOrderByCreatedAtDesc()
+        }
+        return portfolios.map { entity ->
             val portfolio = objectMapper.readValue(entity.portfolioData, DeveloperPortfolio::class.java)
             toSummaryResponse(entity, portfolio)
         }

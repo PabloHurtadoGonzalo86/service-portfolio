@@ -54,5 +54,12 @@ class GlobalExceptionHandler {
         return problem
     }
 
+    @ExceptionHandler(RateLimitExceededException::class)
+    fun handleRateLimit(ex: RateLimitExceededException): ProblemDetail {
+        val problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.message ?: "Rate limit exceeded")
+        problem.title = "Rate Limit Exceeded"
+        return problem
+    }
+
 
 }

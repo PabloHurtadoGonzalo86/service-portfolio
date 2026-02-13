@@ -3,7 +3,10 @@ package com.example.serviceportfolio.controller
 import com.example.serviceportfolio.dtos.GeneratePortfolioRequest
 import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
+import com.example.serviceportfolio.exceptions.RateLimitExceededException
+import com.example.serviceportfolio.services.AuthenticationService
 import com.example.serviceportfolio.services.PortfolioGenerationService
+import com.example.serviceportfolio.services.RateLimitService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/portfolio")
 @Tag(name = "Portfolio Generation", description = "Generate professional developer portfolios from GitHub profiles")
 class PortfolioController(
-    private val portfolioGenerationService: PortfolioGenerationService
+    private val portfolioGenerationService: PortfolioGenerationService,
+    private val rateLimitService: RateLimitService,
+    private val authenticationService: AuthenticationService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -25,9 +30,29 @@ class PortfolioController(
     @ApiResponse(responseCode = "200", description = "Portfolio generated successfully")
     @ApiResponse(responseCode = "400", description = "Invalid GitHub username")
     @ApiResponse(responseCode = "404", description = "GitHub user not found")
+    @ApiResponse(responseCode = "429", description = "Rate limit exceeded")
     @PostMapping("/generate")
     fun generatePortfolio(@Valid @RequestBody request: GeneratePortfolioRequest): ResponseEntity<PortfolioResponse> {
         logger.info("Portfolio generation requested for: {}", request.githubUsername)
+
+        val currentUser = authenticationService.getCurrentUser()
+        val rateLimitKey = if (currentUser != null) {
+            "user:${currentUser.id}:portfolio"
+        } else {
+            "anon:portfolio:${request.githubUsername}"
+        }
+
+        // Rate limit: 10 requests per hour for authenticated users, 3 for anonymous
+        val allowed = if (currentUser != null) {
+            rateLimitService.tryConsume(rateLimitKey, capacity = 10, refillTokens = 10)
+        } else {
+            rateLimitService.tryConsume(rateLimitKey, capacity = 3, refillTokens = 3)
+        }
+
+        if (!allowed) {
+            throw RateLimitExceededException("Rate limit exceeded. Please try again later.")
+        }
+
         val response = portfolioGenerationService.generate(request.githubUsername)
         return ResponseEntity.ok(response)
     }

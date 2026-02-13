@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
     implementation("org.kohsuke:github-api:2.0-rc.5")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.bucket4j:bucket4j-core:8.15.0")
     // Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     // Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
@@ -50,7 +51,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-client-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-validation-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
