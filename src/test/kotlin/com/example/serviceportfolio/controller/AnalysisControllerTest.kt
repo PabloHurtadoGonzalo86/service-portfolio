@@ -1,5 +1,6 @@
 package com.example.serviceportfolio.controller
 
+import com.example.serviceportfolio.config.AsyncConfig
 import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
 import com.example.serviceportfolio.models.RepoAnalysis
@@ -13,19 +14,23 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Client
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.Optional
 
 @WebMvcTest(AnalysisController::class)
+@Import(AsyncConfig::class)
 class AnalysisControllerTest {
 
     @Autowired
@@ -74,17 +79,23 @@ class AnalysisControllerTest {
             readmeContent = "# Test Repo\nA test project."
         ).apply { id = 1L }
 
+        `when`(analysisResultRepository.findFirstByRepoUrlOrderByCreatedAtDesc(any()))
+            .thenReturn(Optional.empty())
         `when`(gitHubRepoService.getRepoContext(any())).thenReturn(repoContext)
         `when`(aiAnalysisService.analyze(any())).thenReturn(repoAnalysis)
         `when`(analysisResultRepository.save(any())).thenReturn(savedEntity)
 
-        mockMvc.perform(
+        val mvcResult = mockMvc.perform(
             post("/api/v1/repos/analyze")
                 .with(oauth2Login())
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"repoUrl": "https://github.com/owner/test-repo"}""")
         )
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.projectName").value("test-repo"))
             .andExpect(jsonPath("$.description").value("A test project"))

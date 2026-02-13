@@ -1,5 +1,6 @@
 package com.example.serviceportfolio.controller
 
+import com.example.serviceportfolio.config.AsyncConfig
 import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
@@ -10,18 +11,22 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
 
 @WebMvcTest(PortfolioController::class)
+@Import(AsyncConfig::class)
 class PortfolioControllerTest {
 
     @Autowired
@@ -73,13 +78,17 @@ class PortfolioControllerTest {
         val response = samplePortfolioResponse()
         `when`(portfolioGenerationService.generate(any())).thenReturn(response)
 
-        mockMvc.perform(
+        val mvcResult = mockMvc.perform(
             post("/api/v1/portfolio/generate")
                 .with(oauth2Login())
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"githubUsername": "testuser"}""")
         )
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.githubUsername").value("testuser"))
             .andExpect(jsonPath("$.developerName").value("Test User"))
@@ -109,13 +118,17 @@ class PortfolioControllerTest {
         `when`(portfolioGenerationService.generate(any()))
             .thenThrow(RepoNotFoundException("GitHub user not found: nonexistent"))
 
-        mockMvc.perform(
+        val mvcResult = mockMvc.perform(
             post("/api/v1/portfolio/generate")
                 .with(oauth2Login())
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"githubUsername": "nonexistent"}""")
         )
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isNotFound)
     }
 
