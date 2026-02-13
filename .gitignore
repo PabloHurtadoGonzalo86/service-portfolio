@@ -26,6 +26,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 application.yaml
+!**/src/test/**/application.yaml
 
 ### NetBeans ###
 /nbproject/private/
@@ -39,3 +40,5 @@ application.yaml
 
 ### Kotlin ###
 .kotlin
+/service-portfolio-pablohg-dev.2026-02-11.private-key.pem
+/service-portfolio-pkcs8.pem

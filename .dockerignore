@@ -1,0 +1,15 @@
+.git
+.github
+.gradle
+.idea
+.claude
+.kotlin
+build
+k8s
+out
+*.md
+*.iml
+*.iws
+*.ipr
+application.yaml
+*.pem
