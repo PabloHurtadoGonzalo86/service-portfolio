@@ -1,0 +1,80 @@
+@import '../../styles/variables';
+
+.container {
+  min-height: 100vh;
+  padding: $spacing-2xl $spacing-lg;
+  
+  @include mobile {
+    padding: $spacing-lg $spacing-md;
+  }
+}
+
+.hero {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto $spacing-3xl;
+}
+
+.title {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin-bottom: $spacing-lg;
+  
+  @include mobile {
+    font-size: $font-size-3xl;
+  }
+}
+
+.subtitle {
+  font-size: $font-size-xl;
+  color: $text-secondary;
+  line-height: 1.6;
+  
+  @include mobile {
+    font-size: $font-size-lg;
+  }
+}
+
+.formContainer {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  padding: $spacing-2xl;
+  background-color: $surface-light;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-lg;
+  
+  @include mobile {
+    padding: $spacing-lg;
+  }
+}
+
+.portfolioContainer {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-2xl;
+  flex-wrap: wrap;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

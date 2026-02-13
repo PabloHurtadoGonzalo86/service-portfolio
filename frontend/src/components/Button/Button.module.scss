@@ -1,0 +1,100 @@
+@import '../../styles/variables';
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium;
+  border: 1px solid transparent;
+  border-radius: $border-radius-md;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  &:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+  
+  &:not(:disabled):active {
+    transform: translateY(0);
+  }
+}
+
+.primary {
+  background-color: $primary-color;
+  color: white;
+  
+  &:not(:disabled):hover {
+    background-color: $primary-hover;
+  }
+}
+
+.secondary {
+  background-color: $surface-light;
+  color: $text-primary;
+  border-color: $border-color;
+  
+  &:not(:disabled):hover {
+    background-color: $background-light;
+  }
+}
+
+.outline {
+  background-color: transparent;
+  color: $primary-color;
+  border-color: $primary-color;
+  
+  &:not(:disabled):hover {
+    background-color: rgba($primary-color, 0.05);
+  }
+}
+
+.sm {
+  padding: $spacing-xs $spacing-md;
+  font-size: $font-size-sm;
+}
+
+.md {
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-base;
+}
+
+.lg {
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-size-lg;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.loading {
+  cursor: wait;
+}
+
+.spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  position: absolute;
+}
+
+.hiddenText {
+  visibility: hidden;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

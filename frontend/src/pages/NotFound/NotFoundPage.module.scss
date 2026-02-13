@@ -1,0 +1,43 @@
+@import '../../styles/variables';
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+}
+
+.content {
+  text-align: center;
+  max-width: 600px;
+}
+
+.title {
+  font-size: 8rem;
+  font-weight: $font-weight-bold;
+  color: $primary-color;
+  margin: 0;
+  line-height: 1;
+  
+  @include mobile {
+    font-size: 6rem;
+  }
+}
+
+.subtitle {
+  font-size: $font-size-3xl;
+  color: $text-primary;
+  margin: $spacing-lg 0;
+  
+  @include mobile {
+    font-size: $font-size-2xl;
+  }
+}
+
+.text {
+  font-size: $font-size-lg;
+  color: $text-secondary;
+  margin-bottom: $spacing-2xl;
+  line-height: 1.6;
+}

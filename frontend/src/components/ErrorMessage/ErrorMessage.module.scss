@@ -1,0 +1,39 @@
+@import '../../styles/variables';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  padding: $spacing-xl;
+  background-color: rgba($error-color, 0.05);
+  border: 1px solid rgba($error-color, 0.2);
+  border-radius: $border-radius-lg;
+  text-align: center;
+}
+
+.icon {
+  font-size: $font-size-3xl;
+}
+
+.message {
+  color: $error-color;
+  font-size: $font-size-base;
+  margin: 0;
+}
+
+.retryButton {
+  margin-top: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background-color: $error-color;
+  color: white;
+  border: none;
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: darken($error-color, 10%);
+  }
+}

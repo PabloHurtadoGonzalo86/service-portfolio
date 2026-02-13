@@ -1,0 +1,228 @@
+@import '../../styles/variables';
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $spacing-2xl $spacing-lg;
+  
+  @include mobile {
+    padding: $spacing-lg $spacing-md;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-3xl;
+  padding-bottom: $spacing-2xl;
+  border-bottom: 2px solid $border-color;
+}
+
+.name {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin-bottom: $spacing-sm;
+  
+  @include mobile {
+    font-size: $font-size-3xl;
+  }
+}
+
+.username {
+  font-size: $font-size-lg;
+  color: $text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.summary {
+  font-size: $font-size-lg;
+  line-height: 1.7;
+  color: $text-primary;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.section {
+  margin-bottom: $spacing-3xl;
+}
+
+.sectionTitle {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid $border-color;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.skillTag {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  background-color: $primary-color;
+  color: white;
+  border-radius: $border-radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.highlights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.highlight {
+  padding: $spacing-md;
+  margin-bottom: $spacing-sm;
+  background-color: $surface-light;
+  border-left: 4px solid $primary-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  line-height: 1.6;
+}
+
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.project {
+  padding: $spacing-xl;
+  background-color: $surface-light;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  transition: box-shadow 0.2s ease;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+}
+
+.projectHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.projectName {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  margin: 0;
+}
+
+.projectLink {
+  color: $primary-color;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.category {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  background-color: $secondary-color;
+  color: white;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  text-transform: uppercase;
+}
+
+.projectDescription {
+  color: $text-primary;
+  font-size: $font-size-base;
+  line-height: 1.6;
+  margin-bottom: $spacing-md;
+}
+
+.notable {
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  line-height: 1.6;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm;
+  background-color: rgba($primary-color, 0.05);
+  border-radius: $border-radius-sm;
+}
+
+.techStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.tech {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  background-color: $background-light;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  font-family: $font-mono;
+}
+
+.skillCategories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-lg;
+  
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skillCategory {
+  padding: $spacing-lg;
+  background-color: $surface-light;
+  border-radius: $border-radius-lg;
+  border: 1px solid $border-color;
+}
+
+.categoryTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.categorySkills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.categorySkill {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  background-color: $background-light;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+}
+
+.footer {
+  margin-top: $spacing-3xl;
+  padding-top: $spacing-xl;
+  border-top: 1px solid $border-color;
+  text-align: center;
+}
+
+.footerText {
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  margin: $spacing-xs 0;
+}
