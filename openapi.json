@@ -1,0 +1,562 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Service Portfolio API",
+    "description": "REST API that analyzes GitHub repositories and generates professional developer portfolios using AI",
+    "contact": {
+      "name": "Pablo Hurtado Gonzalo",
+      "url": "https://github.com/PabloHurtadoGonzalo86"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://serviceportfolioapi.pablohgdev.com",
+      "description": "Production"
+    },
+    {
+      "url": "https://serviceportfolioapi-dev.pablohgdev.com",
+      "description": "Development"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Portfolio Generation",
+      "description": "Generate professional developer portfolios from GitHub profiles"
+    },
+    {
+      "name": "Repository Analysis",
+      "description": "Analyze GitHub repositories and generate READMEs"
+    }
+  ],
+  "paths": {
+    "/api/v1/repos/readme/commit": {
+      "post": {
+        "tags": [
+          "Repository Analysis"
+        ],
+        "summary": "Commit README to repository",
+        "description": "Commits a generated README directly to the user's GitHub repository. Requires OAuth authentication.",
+        "operationId": "commitReadme",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadmeCommitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "README committed successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadmeCommitResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "OAuth authentication required",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadmeCommitResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "GitHub API error during commit",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadmeCommitResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/repos/analyze": {
+      "post": {
+        "tags": [
+          "Repository Analysis"
+        ],
+        "summary": "Analyze a GitHub repository",
+        "description": "Reads a GitHub repo, analyzes the code with AI, and generates a professional README",
+        "operationId": "analyzeRepo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRepoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis completed successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid repository URL",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Repository not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/portfolio/generate": {
+      "post": {
+        "tags": [
+          "Portfolio Generation"
+        ],
+        "summary": "Generate developer portfolio",
+        "description": "Scans a GitHub user's public repositories and generates a professional portfolio with AI",
+        "operationId": "generatePortfolio",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneratePortfolioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Portfolio generated successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid GitHub username",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "GitHub user not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/repos/analyses": {
+      "get": {
+        "tags": [
+          "Repository Analysis"
+        ],
+        "summary": "List all analyses",
+        "description": "Returns all repository analyses ordered by creation date",
+        "operationId": "listAnalyses",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnalysisResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/repos/analyses/{id}": {
+      "get": {
+        "tags": [
+          "Repository Analysis"
+        ],
+        "summary": "Get analysis by ID",
+        "description": "Returns a specific repository analysis",
+        "operationId": "getAnalysis",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analysis found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Analysis not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/portfolio": {
+      "get": {
+        "tags": [
+          "Portfolio Generation"
+        ],
+        "summary": "List all portfolios",
+        "description": "Returns summary of all generated portfolios",
+        "operationId": "listPortfolios",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PortfolioSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/portfolio/{id}": {
+      "get": {
+        "tags": [
+          "Portfolio Generation"
+        ],
+        "summary": "Get portfolio by ID",
+        "operationId": "getPortfolio",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portfolio found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Portfolio not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "home-controller"
+        ],
+        "operationId": "home",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ReadmeCommitRequest": {
+        "type": "object",
+        "properties": {
+          "repoUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^https://github\\.com/[a-zA-Z0-9_.-]+/[a-zA-Z0-9._-]+(?:\\.git)?$"
+          },
+          "readmeContent": {
+            "type": "string",
+            "maxLength": 500000,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "readmeContent",
+          "repoUrl"
+        ]
+      },
+      "ReadmeCommitResponse": {
+        "type": "object",
+        "properties": {
+          "commitSha": {
+            "type": "string"
+          },
+          "commitUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "AnalyzeRepoRequest": {
+        "type": "object",
+        "properties": {
+          "repoUrl": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^https://github\\.com/[a-zA-Z0-9_.-]+/[a-zA-Z0-9._-]+(?:\\.git)?$"
+          }
+        },
+        "required": [
+          "repoUrl"
+        ]
+      },
+      "AnalysisResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "readmeContent": {
+            "type": "string"
+          },
+          "techStack": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "detectedFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GeneratePortfolioRequest": {
+        "type": "object",
+        "properties": {
+          "githubUsername": {
+            "type": "string",
+            "maxLength": 39,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "githubUsername"
+        ]
+      },
+      "PortfolioProject": {
+        "type": "object",
+        "properties": {
+          "repoName": {
+            "type": "string"
+          },
+          "repoUrl": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "techStack": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "whyNotable": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "PortfolioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "githubUsername": {
+            "type": "string"
+          },
+          "developerName": {
+            "type": "string"
+          },
+          "professionalSummary": {
+            "type": "string"
+          },
+          "topSkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectedProjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortfolioProject"
+            }
+          },
+          "skillsByCategory": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "profileHighlights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totalPublicRepos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PortfolioSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "githubUsername": {
+            "type": "string"
+          },
+          "developerName": {
+            "type": "string"
+          },
+          "professionalSummary": {
+            "type": "string"
+          },
+          "topSkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totalPublicRepos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "projectCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
