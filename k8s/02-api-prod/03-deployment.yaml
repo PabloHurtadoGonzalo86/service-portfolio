@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-portfolio-api
+  namespace: service-portfolio
+  labels:
+    app: service-portfolio-api
+    environment: production
+  annotations:
+    keel.sh/policy: force
+    keel.sh/pollSchedule: "@every 1m"
+    keel.sh/trigger: poll
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: service-portfolio-api
+      environment: production
+  template:
+    metadata:
+      labels:
+        app: service-portfolio-api
+        environment: production
+    spec:
+      containers:
+        - name: api
+          image: ocholoko888/service-portfolio:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: service-portfolio-secrets
+            - configMapRef:
+                name: service-portfolio-api-prod-config
+          volumeMounts:
+            - name: github-app-key
+              mountPath: /secrets/github-app
+              readOnly: true
+          resources:
+            requests:
+              cpu: 200m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 768Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: github-app-key
+          secret:
+            secretName: github-app-private-key
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
