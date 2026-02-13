@@ -39,6 +39,9 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
     implementation("org.kohsuke:github-api:2.0-rc.5")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine")
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.16.1")
     // Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     // Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
