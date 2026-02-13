@@ -10,6 +10,9 @@ import com.example.serviceportfolio.repositories.AnalysisResultRepository
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/repos")
+@Tag(name = "Repository Analysis", description = "Analyze GitHub repositories and generate READMEs")
 class AnalysisController(
     private val gitHubRepoService: GitHubRepoService,
     private val aiAnalysisService: AiAnalysisService,
@@ -28,6 +32,10 @@ class AnalysisController(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Operation(summary = "Analyze a GitHub repository", description = "Reads a GitHub repo, analyzes the code with AI, and generates a professional README")
+    @ApiResponse(responseCode = "200", description = "Analysis completed successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid repository URL")
+    @ApiResponse(responseCode = "404", description = "Repository not found")
     @PostMapping("/analyze")
     fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): ResponseEntity<AnalysisResponse> {
         logger.info("Solicitud de análisis recibida para: {}", request.repoUrl)
@@ -49,12 +57,16 @@ class AnalysisController(
         return ResponseEntity.ok(saved.toResponse())
     }
 
+    @Operation(summary = "List all analyses", description = "Returns all repository analyses ordered by creation date")
     @GetMapping("/analyses")
     fun listAnalyses(): ResponseEntity<List<AnalysisResponse>> {
         val results = analysisResultRepository.findAllByOrderByCreatedAtDesc()
         return ResponseEntity.ok(results.map { it.toResponse() })
     }
 
+    @Operation(summary = "Get analysis by ID", description = "Returns a specific repository analysis")
+    @ApiResponse(responseCode = "200", description = "Analysis found")
+    @ApiResponse(responseCode = "404", description = "Analysis not found")
     @GetMapping("/analyses/{id}")
     fun getAnalysis(@PathVariable id: Long): ResponseEntity<AnalysisResponse> {
         val result = analysisResultRepository.findById(id)
@@ -62,6 +74,10 @@ class AnalysisController(
         return ResponseEntity.ok(result.toResponse())
     }
 
+    @Operation(summary = "Commit README to repository", description = "Commits a generated README directly to the user's GitHub repository. Requires OAuth authentication.")
+    @ApiResponse(responseCode = "200", description = "README committed successfully")
+    @ApiResponse(responseCode = "401", description = "OAuth authentication required")
+    @ApiResponse(responseCode = "502", description = "GitHub API error during commit")
     @PostMapping("/readme/commit")
     fun commitReadme(
         @Valid @RequestBody request: ReadmeCommitRequest,
