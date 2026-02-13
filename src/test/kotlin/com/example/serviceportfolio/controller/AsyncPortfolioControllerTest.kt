@@ -4,6 +4,7 @@ import com.example.serviceportfolio.dtos.JobCreatedResponse
 import com.example.serviceportfolio.dtos.JobStatusResponse
 import com.example.serviceportfolio.entities.AsyncJob
 import com.example.serviceportfolio.entities.AsyncJobStatus
+import com.example.serviceportfolio.exceptions.JobNotFoundException
 import com.example.serviceportfolio.services.AsyncPortfolioService
 import com.example.serviceportfolio.services.PortfolioGenerationService
 import org.junit.jupiter.api.Test
@@ -88,7 +89,7 @@ class AsyncPortfolioControllerTest {
     @Test
     fun `get job status returns 404 when job not found`() {
         `when`(asyncPortfolioService.getJobStatus(999L))
-            .thenThrow(IllegalArgumentException("Job not found with id: 999"))
+            .thenThrow(JobNotFoundException("Job not found with id: 999"))
 
         mockMvc.perform(
             get("/api/v1/portfolio/status/999")

@@ -2,6 +2,7 @@ package com.example.serviceportfolio.services
 
 import com.example.serviceportfolio.entities.AsyncJob
 import com.example.serviceportfolio.entities.AsyncJobStatus
+import com.example.serviceportfolio.exceptions.JobNotFoundException
 import com.example.serviceportfolio.repositories.AsyncJobRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Async
@@ -28,7 +29,9 @@ class AsyncPortfolioService(
     fun processPortfolioGeneration(jobId: Long, githubUsername: String) {
         logger.info("Starting async portfolio generation for job {} and user {}", jobId, githubUsername)
         
-        val job = asyncJobRepository.findById(jobId).orElseThrow()
+        val job = asyncJobRepository.findById(jobId).orElseThrow { 
+            JobNotFoundException("Job not found with id: $jobId")
+        }
         job.status = AsyncJobStatus.PROCESSING
         asyncJobRepository.save(job)
 
@@ -51,7 +54,7 @@ class AsyncPortfolioService(
 
     fun getJobStatus(jobId: Long): AsyncJob {
         return asyncJobRepository.findById(jobId).orElseThrow {
-            IllegalArgumentException("Job not found with id: $jobId")
+            JobNotFoundException("Job not found with id: $jobId")
         }
     }
 

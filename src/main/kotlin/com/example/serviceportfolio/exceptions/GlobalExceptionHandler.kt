@@ -61,5 +61,12 @@ class GlobalExceptionHandler {
         return problem
     }
 
+    @ExceptionHandler(JobNotFoundException::class)
+    fun handleJobNotFound(ex: JobNotFoundException): ProblemDetail {
+        val problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Job not found")
+        problem.title = "Job Not Found"
+        return problem
+    }
+
 
 }
