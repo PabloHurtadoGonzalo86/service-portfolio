@@ -27,9 +27,37 @@ REST API that analyzes GitHub repositories and generates professional developer 
 | `GET` | `/api/v1/repos/analyses` | Public | List all analyses |
 | `GET` | `/api/v1/repos/analyses/{id}` | Public | Get analysis by ID |
 | `POST` | `/api/v1/repos/readme/commit` | OAuth | Commit README to repo |
-| `POST` | `/api/v1/portfolio/generate` | Public | Generate developer portfolio |
+| `POST` | `/api/v1/portfolio/generate` | Public | Generate developer portfolio (sync) |
+| `POST` | `/api/v1/portfolio/generate/async` | Public | Generate portfolio asynchronously |
+| `GET` | `/api/v1/portfolio/status/{jobId}` | Public | Poll status of async job |
 | `GET` | `/api/v1/portfolio/{id}` | Public | Get portfolio by ID |
 | `GET` | `/api/v1/portfolio` | Public | List all portfolios |
+
+### Async Portfolio Generation
+
+For better UX with long-running AI operations (30+ seconds):
+
+1. **Start async generation**:
+   ```bash
+   POST /api/v1/portfolio/generate/async
+   {
+     "githubUsername": "octocat"
+   }
+   # Returns: { "jobId": 123, "status": "PENDING", "message": "..." }
+   ```
+
+2. **Poll job status**:
+   ```bash
+   GET /api/v1/portfolio/status/123
+   # Returns: { "jobId": 123, "status": "COMPLETED", "resultId": 456, ... }
+   ```
+
+3. **Get completed portfolio**:
+   ```bash
+   GET /api/v1/portfolio/456
+   ```
+
+Job statuses: `PENDING` → `PROCESSING` → `COMPLETED` (or `FAILED`)
 
 ## Quick Start
 
@@ -85,12 +113,14 @@ service/
   AiAnalysisService       -> AI analysis with Spring AI ChatClient
   ReadmeCommitService     -> Commit README with user OAuth token
   PortfolioGenerationService -> Orchestrate portfolio generation
+  AsyncPortfolioService   -> Async job orchestration with @Async
 client/
   GitHubAppTokenService   -> GitHub App installation token management
 config/
   SecurityConfig          -> Spring Security + OAuth2 + CORS
   AiConfig                -> ChatClient bean
   GitHubConfig            -> hub4j GitHub bean
+  AsyncConfig             -> @EnableAsync + thread pool
 ```
 
 ## Deployment
