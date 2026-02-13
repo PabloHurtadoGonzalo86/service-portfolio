@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-portfolio-api
+  name: service-portfolio-api-dev
   namespace: service-portfolio
   labels:
-    app: service-portfolio-api
+    app: service-portfolio-api-dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: service-portfolio-api
+      app: service-portfolio-api-dev
   template:
     metadata:
       labels:
-        app: service-portfolio-api
+        app: service-portfolio-api-dev
       annotations:
         keel.sh/policy: force
         keel.sh/trigger: poll
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ocholoko888/service-portfolio:latest
+          image: ocholoko888/service-portfolio:develop
           ports:
             - containerPort: 8080
           envFrom:

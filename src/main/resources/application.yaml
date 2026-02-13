@@ -29,16 +29,26 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-  sql:
-    init:
-      mode: always
+  # --- Flyway ---
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
 
 github:
   app:
     app-id: ${GITHUB_APP_CLIENT_ID}                     # ← GitHub App
     installation-id: ${GITHUB_APP_INSTALLATION_ID}       # ← GitHub App
     private-key-path: ${GITHUB_APP_PRIVATE_KEY_PATH}
+
+# --- SpringDoc OpenAPI ---
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
