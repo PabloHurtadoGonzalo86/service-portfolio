@@ -31,9 +31,9 @@ spec:
             - name: GITHUB_APP_PRIVATE_KEY_PATH
               value: /secrets/github-app/private-key.pem
             - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-              value: update
-            - name: SPRING_SQL_INIT_MODE
-              value: always
+              value: validate
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
             - name: JAVA_OPTS
               value: "-Xms256m -Xmx512m"
           volumeMounts:

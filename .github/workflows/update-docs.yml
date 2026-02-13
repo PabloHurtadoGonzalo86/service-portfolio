@@ -7,25 +7,11 @@ on:
       - completed
     branches:
       - main
-      - develop
 
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to fetch the spec from'
-        required: true
-        default: 'develop'
-        type: choice
-        options:
-          - develop
-          - production
 
 permissions:
   contents: write
-
-env:
-  API_URL_PRODUCTION: https://serviceportfolioapi.pablohgdev.com
-  API_URL_DEVELOP: https://serviceportfolioapi.pablohgdev.com
 
 jobs:
   update-docs:
@@ -33,12 +19,36 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
 
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: serviceportfolio
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+
+      - name: Setup Java 24
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 24
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -48,58 +58,49 @@ jobs:
       - name: Install openapi-to-postmanv2
         run: npm install -g openapi-to-postmanv2
 
-      - name: Determine API URL
-        id: api-url
+      - name: Create temporary private key
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            ENV="${{ github.event.inputs.environment }}"
-          elif [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
-            ENV="production"
-          else
-            ENV="develop"
-          fi
+          mkdir -p /tmp/github-app
+          openssl genpkey -algorithm RSA -out /tmp/github-app/private-key.pem -pkeyopt rsa_keygen_bits:2048
 
-          if [ "$ENV" = "production" ]; then
-            echo "url=${{ env.API_URL_PRODUCTION }}" >> $GITHUB_OUTPUT
-          else
-            echo "url=${{ env.API_URL_DEVELOP }}" >> $GITHUB_OUTPUT
-          fi
-          echo "env=$ENV" >> $GITHUB_OUTPUT
-
-      - name: Wait for API deployment
+      - name: Build and start application
         run: |
-          echo "Waiting 60 seconds for deployment to complete..."
-          sleep 60
+          ./gradlew bootJar -x test --no-daemon
+          java -jar build/libs/*.jar \
+            --server.port=8081 \
+            --spring.datasource.url=jdbc:postgresql://localhost:5432/serviceportfolio \
+            --spring.datasource.username=test \
+            --spring.datasource.password=test \
+            --spring.ai.openai.api-key=dummy-key-for-docs \
+            --spring.security.oauth2.client.registration.github.client-id=dummy \
+            --spring.security.oauth2.client.registration.github.client-secret=dummy \
+            --github.app.app-id=0 \
+            --github.app.installation-id=0 \
+            --github.app.private-key-path=/tmp/github-app/private-key.pem &
 
-      - name: Fetch OpenAPI spec
-        id: fetch-spec
-        run: |
-          API_URL="${{ steps.api-url.outputs.url }}"
-          echo "Fetching OpenAPI spec from: $API_URL/v3/api-docs"
-
-          for i in 1 2 3; do
-            HTTP_CODE=$(curl -s -w "%{http_code}" -o openapi.json "$API_URL/v3/api-docs")
-            if [ "$HTTP_CODE" = "200" ]; then
-              echo "OpenAPI spec fetched successfully"
-              cat openapi.json | jq '.' > openapi_formatted.json
-              mv openapi_formatted.json openapi.json
+          echo "Waiting for application to start..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8081/actuator/health > /dev/null 2>&1; then
+              echo "Application started successfully"
               break
             fi
-            echo "Attempt $i failed (HTTP $HTTP_CODE), waiting 30 seconds..."
-            sleep 30
+            echo "Attempt $i/30..."
+            sleep 5
           done
 
-          if [ ! -s openapi.json ]; then
-            echo "Error: Could not fetch OpenAPI spec"
+      - name: Fetch OpenAPI spec
+        run: |
+          HTTP_CODE=$(curl -s -w "%{http_code}" -o openapi.json "http://localhost:8081/v3/api-docs")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Error: Could not fetch OpenAPI spec (HTTP $HTTP_CODE)"
             exit 1
           fi
-
-          echo "Spec size: $(wc -c < openapi.json) bytes"
+          cat openapi.json | jq '.' > openapi_formatted.json
+          mv openapi_formatted.json openapi.json
+          echo "OpenAPI spec fetched: $(wc -c < openapi.json) bytes"
 
       - name: Generate Postman Collection
         run: |
-          echo "Generating Postman Collection from OpenAPI spec..."
-
           openapi2postmanv2 \
             -s openapi.json \
             -o ServicePortfolio_Collection_NEW.postman_collection.json \
@@ -111,17 +112,14 @@ jobs:
             exit 1
           fi
 
-          echo "Postman collection generated successfully"
-
       - name: Update collection metadata
         run: |
           BRANCH="${{ github.event.workflow_run.head_branch || github.ref_name }}"
           DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
-          ENV="${{ steps.api-url.outputs.env }}"
 
-          jq --arg date "$DATE" --arg branch "$BRANCH" --arg env "$ENV" '
+          jq --arg date "$DATE" --arg branch "$BRANCH" '
             .info.name = "Service Portfolio API - Auto-generated" |
-            .info.description = "Collection auto-generated from OpenAPI spec.\n\nDate: \($date)\nBranch: \($branch)\nEnvironment: \($env)\n\nGenerated by GitHub Actions workflow."
+            .info.description = "Collection auto-generated from OpenAPI spec.\n\nDate: \($date)\nBranch: \($branch)\n\nGenerated by GitHub Actions workflow."
           ' ServicePortfolio_Collection_NEW.postman_collection.json > temp.json
           mv temp.json ServicePortfolio_Collection.postman_collection.json
           rm -f ServicePortfolio_Collection_NEW.postman_collection.json
@@ -139,13 +137,11 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
           BRANCH="${{ github.event.workflow_run.head_branch || github.ref_name }}"
-          ENV="${{ steps.api-url.outputs.env }}"
 
           git commit -m "docs: auto-update OpenAPI spec and Postman collection
 
-          - Updated from $ENV environment API
           - Branch: $BRANCH
-          - Generated by GitHub Actions
+          - Generated at build time (no live API dependency)
 
           Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
@@ -158,8 +154,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Item | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ steps.api-url.outputs.env }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| API URL | ${{ steps.api-url.outputs.url }} |" >> $GITHUB_STEP_SUMMARY
           echo "| OpenAPI Spec | Updated |" >> $GITHUB_STEP_SUMMARY
           echo "| Postman Collection | Updated |" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.changes.outputs.changed }}" = "true" ]; then
