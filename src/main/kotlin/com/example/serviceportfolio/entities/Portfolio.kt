@@ -8,6 +8,10 @@ import java.time.Instant
 @Table(name = "portfolios")
 class Portfolio(
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    var user: User? = null,
+
     @Column(nullable = false)
     var githubUsername: String = "",
 

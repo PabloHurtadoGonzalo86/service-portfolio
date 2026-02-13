@@ -10,6 +10,10 @@ import java.time.Instant
 @Table(name = "analysis_results")
 class AnalysisResult(
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    var user: User? = null,
+
     @Column(nullable = false)
     var repoUrl: String = "",
 
