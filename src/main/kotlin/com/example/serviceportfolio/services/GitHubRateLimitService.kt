@@ -44,7 +44,11 @@ class GitHubRateLimitService(
             return info
 
         } catch (e: IOException) {
-            logger.error("Failed to check GitHub API rate limit", e)
+            logger.error(
+                "Failed to check GitHub API rate limit. This may be due to network issues, " +
+                "invalid GitHub App token, or GitHub API unavailability. Error: ${e.message}", 
+                e
+            )
             throw e
         }
     }
@@ -54,7 +58,11 @@ class GitHubRateLimitService(
             val info = checkRateLimit()
             info.remaining > 0
         } catch (e: Exception) {
-            logger.error("Error checking rate limit availability", e)
+            logger.error(
+                "Error checking GitHub API rate limit availability. " +
+                "Defaulting to false to prevent potential rate limit violations. Error: ${e.message}", 
+                e
+            )
             false
         }
     }

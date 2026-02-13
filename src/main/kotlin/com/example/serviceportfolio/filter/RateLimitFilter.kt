@@ -18,6 +18,9 @@ class RateLimitFilter(
 ) : OncePerRequestFilter() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    
+    // Store bucket creation time to calculate reset time
+    private val bucketResetTimes: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -36,8 +39,12 @@ class RateLimitFilter(
         val bucketKey = "$clientIp:$path"
         
         val bucket = rateLimitBuckets.computeIfAbsent(bucketKey) { 
+            val now = System.currentTimeMillis()
+            bucketResetTimes[bucketKey] = now + 60000 // 1 minute from now
             createBucketForPath(path)
         }
+        
+        val resetTime = bucketResetTimes.getOrDefault(bucketKey, System.currentTimeMillis() + 60000)
 
         val probe = bucket.tryConsumeAndReturnRemaining(1)
         
@@ -45,17 +52,20 @@ class RateLimitFilter(
             // Add rate limit headers
             response.addHeader("X-RateLimit-Limit", getBucketCapacity(path).toString())
             response.addHeader("X-RateLimit-Remaining", probe.remainingTokens.toString())
-            response.addHeader("X-RateLimit-Reset", (System.currentTimeMillis() / 1000 + 60).toString())
+            response.addHeader("X-RateLimit-Reset", (resetTime / 1000).toString())
             
             filterChain.doFilter(request, response)
         } else {
             logger.warn("Rate limit exceeded for IP: {} on path: {}", clientIp, path)
             
+            // Calculate seconds until reset
+            val secondsUntilReset = ((resetTime - System.currentTimeMillis()) / 1000).coerceAtLeast(0)
+            
             response.status = HttpStatus.TOO_MANY_REQUESTS.value()
             response.addHeader("X-RateLimit-Limit", getBucketCapacity(path).toString())
             response.addHeader("X-RateLimit-Remaining", "0")
-            response.addHeader("X-RateLimit-Reset", (System.currentTimeMillis() / 1000 + 60).toString())
-            response.addHeader("Retry-After", "60")
+            response.addHeader("X-RateLimit-Reset", (resetTime / 1000).toString())
+            response.addHeader("Retry-After", secondsUntilReset.toString())
             response.contentType = "application/json"
             response.writer.write(
                 """{"error":"Rate limit exceeded","message":"Too many requests. Please try again later."}"""
