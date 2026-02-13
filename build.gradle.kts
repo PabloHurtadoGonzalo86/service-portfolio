@@ -36,6 +36,7 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-model-openai")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
     implementation("org.kohsuke:github-api:2.0-rc.5")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     // Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
