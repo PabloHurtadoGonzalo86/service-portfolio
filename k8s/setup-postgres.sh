@@ -8,7 +8,7 @@ kubectl apply -f namespace.yml
 # 2. Instalar PostgreSQL
 helm install postgresql bitnami/postgresql -n service-portfolio \
   --set auth.username=serviceportfolio \
-  --set auth.password=REPLACE_ME_WITH_SECURE_PASSWORD \
+  --set auth.password=<YOUR_PASSWORD> \
   --set auth.database=serviceportfolio \
   --set primary.persistence.storageClass=longhorn \
   --set primary.persistence.size=10Gi \
@@ -19,7 +19,8 @@ helm install postgresql bitnami/postgresql -n service-portfolio \
 
 echo "PostgreSQL instalado. URL interna: jdbc:postgresql://postgresql.service-portfolio.svc.cluster.local:5432/serviceportfolio"
 
-# 3. Aplicar secrets (editar secrets.yml primero con valores reales)
+# 3. Aplicar secrets (copiar secrets.yml.example a secrets.yml, rellenar valores reales)
+# cp secrets.yml.example secrets.yml
 # kubectl apply -f secrets.yml
 
 # 4. Desplegar la app

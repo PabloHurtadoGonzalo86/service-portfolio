@@ -41,6 +41,7 @@ class SecurityConfig(
                     .requestMatchers("/api/v1/repos/analyses/{id}").permitAll()
                     .requestMatchers("/api/v1/portfolio/**").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api-docs.yaml").permitAll()
                     .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
             }
