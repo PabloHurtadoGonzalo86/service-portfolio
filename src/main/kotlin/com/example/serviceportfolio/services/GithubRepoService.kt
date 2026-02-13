@@ -1,7 +1,6 @@
 package com.example.serviceportfolio.services
 
 import com.example.serviceportfolio.client.GitHubAppTokenService
-import com.example.serviceportfolio.config.CacheConfig
 import com.example.serviceportfolio.models.RepoContext
 import com.example.serviceportfolio.models.RepoSummary
 import com.example.serviceportfolio.exceptions.GitHubApiException
@@ -11,7 +10,6 @@ import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHubBuilder
 import org.kohsuke.github.HttpException
 import org.slf4j.LoggerFactory
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.io.IOException
 
@@ -41,7 +39,6 @@ class GitHubRepoService(
         )
     }
 
-    @Cacheable(value = [CacheConfig.GITHUB_REPO_CONTEXT_CACHE], key = "#repoUrl", unless = "#result == null")
     fun getRepoContext(repoUrl: String): RepoContext {
         val (owner, repo) = GitHubUrlParser.parse(repoUrl)
         logger.info("Fetching repo context for {}/{}", owner, repo)
@@ -123,7 +120,6 @@ class GitHubRepoService(
         return result
     }
 
-    @Cacheable(value = [CacheConfig.GITHUB_USER_REPOS_CACHE], key = "#username", unless = "#result == null || #result.isEmpty()")
     fun listUserRepos(username: String): List<RepoSummary> {
         logger.info("Listing repositories for user: {}", username)
 

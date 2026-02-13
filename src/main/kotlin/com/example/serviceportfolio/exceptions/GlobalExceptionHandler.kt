@@ -46,13 +46,6 @@ class GlobalExceptionHandler {
         return problem
     }
 
-    @ExceptionHandler(RateLimitExceededException::class)
-    fun handleRateLimit(ex: RateLimitExceededException): ProblemDetail {
-        val problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.message ?: "Rate limit exceeded")
-        problem.title = "Too Many Requests"
-        return problem
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ProblemDetail {
         val errors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }

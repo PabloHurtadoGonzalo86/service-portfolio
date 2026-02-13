@@ -12,5 +12,3 @@ class GitHubApiException(message: String, cause: Throwable? = null) : RuntimeExc
 class AiAnalysisException(message: String, cause: Throwable? = null) : RuntimeException(message , cause)
 
 class ReadmeCommitException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
-
-class RateLimitExceededException(message: String) : RuntimeException(message)

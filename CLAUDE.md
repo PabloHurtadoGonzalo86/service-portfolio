@@ -26,8 +26,6 @@ Dos flujos principales:
 - **Monitoreo:** Spring Boot Actuator
 - **DB:** PostgreSQL + Spring Data JPA + H2 (tests)
 - **JSON:** Jackson Kotlin Module
-- **Cache:** Spring Cache + Caffeine (in-memory, TTL-based)
-- **Rate Limiting:** Bucket4j (token bucket algorithm)
 - **Tests:** JUnit 5 + Mockito-Kotlin + Spring Security Test
 
 ## Arquitectura
@@ -46,14 +44,9 @@ client/
 └── GitHubAppTokenService → Gestion de tokens de GitHub App (JWT → installation token)
 config/
 ├── AiConfig              → Bean ChatClient de Spring AI
-├── AsyncConfig           → ThreadPoolTaskExecutor para operaciones AI async
-├── CacheConfig           → @EnableCaching + Caffeine cache manager
 ├── GitHubConfig          → Bean GitHub (hub4j) con GitHub App
 ├── GitHubAppProperties   → @ConfigurationProperties para GitHub App
-├── RateLimitConfig       → Reglas de rate limiting por endpoint
 └── SecurityConfig        → Spring Security + OAuth2 + CORS configurable
-filter/
-└── RateLimitFilter       → Servlet filter con Bucket4j (token bucket por IP)
 dtos/                 → Request/Response DTOs (Analyze, Portfolio, ReadmeCommit)
 models/               → RepoAnalysis, RepoContext, DeveloperPortfolio, PortfolioProject, RepoSummary
 entities/             → AnalysisResult, Portfolio (JPA entities)
@@ -147,10 +140,10 @@ Backend API completado con todas las funcionalidades core:
 - CI/CD con GitHub Actions, Docker, y manifiestos Kubernetes
 - Desplegado en: `serviceportfolioapi.pablohgdev.com`
 
-### Implementado recientemente
-- **Async (DeferredResult)**: POST /analyze y POST /portfolio/generate ejecutan en thread pool dedicado (`aiTaskExecutor`), liberando threads de Tomcat
-- **Rate Limiting (Bucket4j)**: Token bucket por IP. POST /analyze: 5/h, POST /generate: 3/h, GET: 60/min. Headers X-RateLimit-* en responses
-- **Cache**: DB deduplication para analisis/portfolios duplicados + Caffeine @Cacheable en GitHub API calls (TTL 30min)
+### Mejoras futuras
+- `@EnableAsync` + `@Async` para operaciones AI no-bloqueantes
+- Rate limiting
+- Caché de análisis
 
 ## Notas para Agentes
 

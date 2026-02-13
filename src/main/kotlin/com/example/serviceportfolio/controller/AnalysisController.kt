@@ -15,13 +15,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.context.request.async.DeferredResult
 
 @RestController
 @RequestMapping("/api/v1/repos")
@@ -30,8 +27,7 @@ class AnalysisController(
     private val gitHubRepoService: GitHubRepoService,
     private val aiAnalysisService: AiAnalysisService,
     private val analysisResultRepository: AnalysisResultRepository,
-    private val readmeCommitService: ReadmeCommitService,
-    @Qualifier("aiTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
+    private val readmeCommitService: ReadmeCommitService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -41,48 +37,24 @@ class AnalysisController(
     @ApiResponse(responseCode = "400", description = "Invalid repository URL")
     @ApiResponse(responseCode = "404", description = "Repository not found")
     @PostMapping("/analyze")
-    fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): DeferredResult<ResponseEntity<AnalysisResponse>> {
+    fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): ResponseEntity<AnalysisResponse> {
         logger.info("Solicitud de análisis recibida para: {}", request.repoUrl)
 
-        val deferredResult = DeferredResult<ResponseEntity<AnalysisResponse>>(120_000L)
-        deferredResult.onTimeout {
-            logger.warn("Timeout al analizar repositorio: {}", request.repoUrl)
-            deferredResult.setErrorResult(
-                RuntimeException("Analysis timed out for ${request.repoUrl}")
-            )
-        }
+        val repoContext = gitHubRepoService.getRepoContext(request.repoUrl)
+        val analysis = aiAnalysisService.analyze(repoContext)
 
-        taskExecutor.execute {
-            try {
-                val existing = analysisResultRepository.findFirstByRepoUrlOrderByCreatedAtDesc(request.repoUrl)
-                if (existing.isPresent) {
-                    logger.info("Análisis existente encontrado para: {}, id: {}", request.repoUrl, existing.get().id)
-                    deferredResult.setResult(ResponseEntity.ok(existing.get().toResponse()))
-                    return@execute
-                }
+        val entity = AnalysisResult(
+            repoUrl = request.repoUrl,
+            projectName = analysis.projectName,
+            shortDescription = analysis.shortDescription,
+            techStack = analysis.techStack,
+            detectedFeatures = analysis.detectedFeatures,
+            readmeContent = analysis.readmeMarkdown
+        )
+        val saved = analysisResultRepository.save(entity)
 
-                val repoContext = gitHubRepoService.getRepoContext(request.repoUrl)
-                val analysis = aiAnalysisService.analyze(repoContext)
-
-                val entity = AnalysisResult(
-                    repoUrl = request.repoUrl,
-                    projectName = analysis.projectName,
-                    shortDescription = analysis.shortDescription,
-                    techStack = analysis.techStack,
-                    detectedFeatures = analysis.detectedFeatures,
-                    readmeContent = analysis.readmeMarkdown
-                )
-                val saved = analysisResultRepository.save(entity)
-
-                logger.info("Análisis guardado con id: {}", saved.id)
-                deferredResult.setResult(ResponseEntity.ok(saved.toResponse()))
-            } catch (e: Exception) {
-                logger.error("Error al analizar repositorio {}: {}", request.repoUrl, e.message)
-                deferredResult.setErrorResult(e)
-            }
-        }
-
-        return deferredResult
+        logger.info("Análisis guardado con id: {}", saved.id)
+        return ResponseEntity.ok(saved.toResponse())
     }
 
     @Operation(summary = "List all analyses", description = "Returns all repository analyses ordered by creation date")

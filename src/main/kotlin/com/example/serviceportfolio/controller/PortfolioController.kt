@@ -9,18 +9,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.context.request.async.DeferredResult
 
 @RestController
 @RequestMapping("/api/v1/portfolio")
 @Tag(name = "Portfolio Generation", description = "Generate professional developer portfolios from GitHub profiles")
 class PortfolioController(
-    private val portfolioGenerationService: PortfolioGenerationService,
-    @Qualifier("aiTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
+    private val portfolioGenerationService: PortfolioGenerationService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -30,28 +26,10 @@ class PortfolioController(
     @ApiResponse(responseCode = "400", description = "Invalid GitHub username")
     @ApiResponse(responseCode = "404", description = "GitHub user not found")
     @PostMapping("/generate")
-    fun generatePortfolio(@Valid @RequestBody request: GeneratePortfolioRequest): DeferredResult<ResponseEntity<PortfolioResponse>> {
+    fun generatePortfolio(@Valid @RequestBody request: GeneratePortfolioRequest): ResponseEntity<PortfolioResponse> {
         logger.info("Portfolio generation requested for: {}", request.githubUsername)
-
-        val deferredResult = DeferredResult<ResponseEntity<PortfolioResponse>>(120_000L)
-        deferredResult.onTimeout {
-            logger.warn("Timeout generating portfolio for: {}", request.githubUsername)
-            deferredResult.setErrorResult(
-                RuntimeException("Portfolio generation timed out for ${request.githubUsername}")
-            )
-        }
-
-        taskExecutor.execute {
-            try {
-                val response = portfolioGenerationService.generate(request.githubUsername)
-                deferredResult.setResult(ResponseEntity.ok(response))
-            } catch (e: Exception) {
-                logger.error("Error generating portfolio for {}: {}", request.githubUsername, e.message)
-                deferredResult.setErrorResult(e)
-            }
-        }
-
-        return deferredResult
+        val response = portfolioGenerationService.generate(request.githubUsername)
+        return ResponseEntity.ok(response)
     }
 
     @Operation(summary = "Get portfolio by ID")

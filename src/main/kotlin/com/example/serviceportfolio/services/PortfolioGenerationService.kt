@@ -23,13 +23,6 @@ class PortfolioGenerationService(
     fun generate(githubUsername: String): PortfolioResponse {
         logger.info("Generating portfolio for: {}", githubUsername)
 
-        val existing = portfolioRepository.findFirstByGithubUsernameOrderByCreatedAtDesc(githubUsername)
-        if (existing.isPresent) {
-            logger.info("Portfolio existente encontrado para: {}, id: {}", githubUsername, existing.get().id)
-            val portfolio = objectMapper.readValue(existing.get().portfolioData, DeveloperPortfolio::class.java)
-            return toResponse(existing.get(), portfolio)
-        }
-
         val repos = gitHubRepoService.listUserRepos(githubUsername)
         if (repos.isEmpty()) {
             throw RepoNotFoundException("No public repositories found for user: $githubUsername")
