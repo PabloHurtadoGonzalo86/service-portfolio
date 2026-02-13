@@ -3,21 +3,29 @@
 [![CI](https://github.com/PabloHurtadoGonzalo86/service-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/PabloHurtadoGonzalo86/service-portfolio/actions/workflows/ci.yml)
 [![CD](https://github.com/PabloHurtadoGonzalo86/service-portfolio/actions/workflows/cd.yml/badge.svg)](https://github.com/PabloHurtadoGonzalo86/service-portfolio/actions/workflows/cd.yml)
 
-REST API that analyzes GitHub repositories and generates professional developer portfolios using AI.
+Full-stack SaaS application that analyzes GitHub repositories and generates professional developer portfolios using AI.
 
 ## What it does
 
 1. **Repo Analysis** - Pass a GitHub repo URL, the API reads the code and generates a professional README with AI
 2. **Portfolio Generation** - Pass a GitHub username, the API scans all public repos and generates a complete developer portfolio
 3. **README Commit** - Commit the generated README directly to the user's repository via OAuth
+4. **Portfolio Sharing** - Share your portfolio via a public URL with SEO optimization
 
 ## Tech Stack
 
+### Backend
 - **Kotlin** 2.2.21 + **Spring Boot** 4.0.2 + **Java** 24
 - **Spring AI** 2.0.0-M2 (OpenAI)
 - **hub4j/github-api** for GitHub integration
 - **PostgreSQL** for persistence
 - **Spring Security** OAuth2 (GitHub OAuth + GitHub App)
+
+### Frontend
+- **React** 19 + **Vite** + **TypeScript**
+- **React Router** 7 for SPA routing
+- **SCSS** for styling with mobile-first responsive design
+- **Custom SEO** component for meta tags and OpenGraph
 
 ## API Endpoints
 
@@ -59,9 +67,19 @@ DB_PASSWORD=your-db-password
 
 ### Run locally
 
+**Backend:**
 ```bash
 ./gradlew bootRun
 ```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend will run on `http://localhost:5173` and proxy API requests to the backend at `http://localhost:8080`.
 
 ### Build
 
@@ -71,14 +89,23 @@ DB_PASSWORD=your-db-password
 
 ### Docker
 
+**Backend:**
 ```bash
 docker build -t service-portfolio .
 docker run -p 8080:8080 --env-file .env service-portfolio
 ```
 
+**Frontend:**
+```bash
+cd frontend
+docker build -t service-portfolio-frontend .
+docker run -p 80:80 service-portfolio-frontend
+```
+
 ## Architecture
 
 ```
+Backend (Spring Boot):
 controller/           -> REST endpoints
 service/
   GitHubRepoService       -> Read repos with hub4j (GitHub App token)
@@ -91,16 +118,41 @@ config/
   SecurityConfig          -> Spring Security + OAuth2 + CORS
   AiConfig                -> ChatClient bean
   GitHubConfig            -> hub4j GitHub bean
+
+Frontend (React):
+pages/
+  HomePage              -> GitHub username input + portfolio preview
+  PortfolioPage         -> Public portfolio view with sharing
+  NotFoundPage          -> 404 error page
+components/
+  PortfolioView         -> Portfolio display component
+  Button, Input         -> Reusable UI components
+  LoadingSpinner        -> Loading states
+  ErrorMessage          -> Error handling
+  SEO                   -> Dynamic meta tags for SEO
+services/
+  api.ts                -> Backend API client
+hooks/
+  usePortfolioGenerator -> Portfolio generation logic
 ```
 
 ## Deployment
 
-Kubernetes manifests are in `k8s/`. See `k8s/setup-postgres.sh` for setup instructions.
+Kubernetes manifests are in `k8s/`:
+- `deployment.yml` - Backend API deployment
+- `frontend-deployment.yml` - Frontend SPA deployment
+- `setup-postgres.sh` - PostgreSQL setup script
 
 The CI/CD pipeline automatically:
 - Runs tests on every PR (CI)
-- Builds and pushes Docker image on merge to main (CD)
+- Builds and pushes Docker images on merge to main (CD)
+  - Backend: `ocholoko888/service-portfolio:latest`
+  - Frontend: `ghcr.io/pablohurtadogonzalo86/service-portfolio-frontend:latest`
 - Keel auto-deploys new images to the cluster
+
+**URLs:**
+- Backend API: https://serviceportfolioapi.pablohgdev.com
+- Frontend: https://portfolio.pablohgdev.com
 
 ## License
 
