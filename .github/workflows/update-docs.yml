@@ -72,6 +72,8 @@ jobs:
             --spring.datasource.url=jdbc:postgresql://localhost:5432/serviceportfolio \
             --spring.datasource.username=test \
             --spring.datasource.password=test \
+            --spring.jpa.hibernate.ddl-auto=update \
+            --spring.flyway.enabled=false \
             --spring.ai.openai.api-key=dummy-key-for-docs \
             --spring.security.oauth2.client.registration.github.client-id=dummy \
             --spring.security.oauth2.client.registration.github.client-secret=dummy \
@@ -79,21 +81,32 @@ jobs:
             --github.app.installation-id=0 \
             --github.app.private-key-path=/tmp/github-app/private-key.pem &
 
-          echo "Waiting for application to start..."
-          for i in $(seq 1 30); do
+          APP_PID=$!
+          echo "Waiting for application (PID $APP_PID) to start..."
+          STARTED=false
+          for i in $(seq 1 60); do
             if curl -sf http://localhost:8081/actuator/health > /dev/null 2>&1; then
-              echo "Application started successfully"
+              echo "Application started successfully after $((i * 3)) seconds"
+              STARTED=true
               break
             fi
-            echo "Attempt $i/30..."
-            sleep 5
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo "Error: Application process died"
+              exit 1
+            fi
+            sleep 3
           done
+          if [ "$STARTED" != "true" ]; then
+            echo "Error: Application failed to start within 180 seconds"
+            exit 1
+          fi
 
       - name: Fetch OpenAPI spec
         run: |
           HTTP_CODE=$(curl -s -w "%{http_code}" -o openapi.json "http://localhost:8081/v3/api-docs")
           if [ "$HTTP_CODE" != "200" ]; then
             echo "Error: Could not fetch OpenAPI spec (HTTP $HTTP_CODE)"
+            curl -s http://localhost:8081/actuator/health || true
             exit 1
           fi
           cat openapi.json | jq '.' > openapi_formatted.json
