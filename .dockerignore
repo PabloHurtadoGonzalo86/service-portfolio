@@ -5,6 +5,7 @@
 .claude
 .kotlin
 build
+!build/libs
 k8s
 out
 *.md
