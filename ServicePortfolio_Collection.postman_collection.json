@@ -5,7 +5,7 @@
       "description": "Generate professional developer portfolios from GitHub profiles",
       "item": [
         {
-          "id": "6f29534a-4e2c-4a0b-97b1-4ad2f6f54d59",
+          "id": "988b04ea-0699-44e4-8f5b-fbfd751d0598",
           "name": "Generate developer portfolio",
           "request": {
             "name": "Generate developer portfolio",
@@ -51,7 +51,7 @@
           },
           "response": [
             {
-              "id": "9f3a0223-fd3d-4f0f-8425-9ed23d9fc7da",
+              "id": "7bfd8f04-4a64-4d7c-a6e5-63faba9f34df",
               "name": "Portfolio generated successfully",
               "originalRequest": {
                 "url": {
@@ -102,7 +102,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "2405baab-7f60-41ed-879b-8926256a623c",
+              "id": "ac50041d-9e8a-48a2-ac0f-b4f55001246c",
               "name": "Invalid GitHub username",
               "originalRequest": {
                 "url": {
@@ -153,7 +153,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "c3852fd1-e6af-45c2-9102-d34b16374e48",
+              "id": "1bd5e1dc-bae3-4d80-9c87-bcde3d3f4c75",
               "name": "GitHub user not found",
               "originalRequest": {
                 "url": {
@@ -210,7 +210,7 @@
           }
         },
         {
-          "id": "23ca103a-7532-4503-b650-dfa22ebcf7a7",
+          "id": "da22a9b2-f8d0-4914-adf7-acfcf31db976",
           "name": "List all portfolios",
           "request": {
             "name": "List all portfolios",
@@ -242,7 +242,7 @@
           },
           "response": [
             {
-              "id": "25386600-66da-44e9-a0bc-3d539288a584",
+              "id": "98c37196-e6df-4102-b897-cbdd36273ed6",
               "name": "OK",
               "originalRequest": {
                 "url": {
@@ -285,7 +285,7 @@
           }
         },
         {
-          "id": "790a15b2-6d1f-4cfc-afbe-0e6e867a011b",
+          "id": "d81be02d-0abd-4f11-a330-da49e6d94052",
           "name": "Get portfolio by ID",
           "request": {
             "name": "Get portfolio by ID",
@@ -326,7 +326,7 @@
           },
           "response": [
             {
-              "id": "fff1c6c6-1d13-43f8-b1aa-0fc428fe9945",
+              "id": "5db8715b-c43b-4227-93ef-b937bfcb5c62",
               "name": "Portfolio found",
               "originalRequest": {
                 "url": {
@@ -375,7 +375,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "81707a9a-c72a-4e55-ae11-000a5d021354",
+              "id": "de1da702-764b-49c4-859c-2379ef5238a6",
               "name": "Portfolio not found",
               "originalRequest": {
                 "url": {
@@ -436,7 +436,7 @@
       "description": "Analyze GitHub repositories and generate READMEs",
       "item": [
         {
-          "id": "c4138654-4cf5-40c5-b171-047acec17ddb",
+          "id": "5bfd6702-5a6a-4228-8edb-4815e1ab75b6",
           "name": "Commit README to repository",
           "request": {
             "name": "Commit README to repository",
@@ -471,7 +471,7 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/ICgcLd/dosBJ.git\"\n}",
+              "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/I3D_f/o\"\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -483,7 +483,7 @@
           },
           "response": [
             {
-              "id": "ad7c3652-545f-4e9d-a229-91bb67cfc88a",
+              "id": "7585c03a-d76b-49a2-8d9f-a8785ba791d0",
               "name": "README committed successfully",
               "originalRequest": {
                 "url": {
@@ -513,7 +513,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/ICgcLd/dosBJ.git\"\n}",
+                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/I3D_f/o\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -535,7 +535,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "95cbeab8-2517-422f-a8d8-9d6e56b4107c",
+              "id": "259762fd-ad04-4c17-9994-1bcd6044adaf",
               "name": "OAuth authentication required",
               "originalRequest": {
                 "url": {
@@ -565,7 +565,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/ICgcLd/dosBJ.git\"\n}",
+                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/I3D_f/o\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -587,7 +587,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "c958aaaa-7ad6-4f21-a89b-1ee91ecd2073",
+              "id": "f4a7dda4-9b69-438a-97bd-898f5b3dae46",
               "name": "GitHub API error during commit",
               "originalRequest": {
                 "url": {
@@ -617,7 +617,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/ICgcLd/dosBJ.git\"\n}",
+                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/I3D_f/o\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -645,7 +645,7 @@
           }
         },
         {
-          "id": "b051598e-ad19-4a0e-b99d-488323307d78",
+          "id": "804b3eb1-bb7b-4860-97c4-41fdcdf0bc6d",
           "name": "Analyze a GitHub repository",
           "request": {
             "name": "Analyze a GitHub repository",
@@ -679,7 +679,7 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"repoUrl\": \"https://github.com/EMSs/K\"\n}",
+              "raw": "{\n  \"repoUrl\": \"https://github.com/sx_4bX9wRO/uTEzcEmj\"\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -691,7 +691,7 @@
           },
           "response": [
             {
-              "id": "8aaee68e-46d3-45ed-a5ee-33fe4e9dd787",
+              "id": "f9bc5cde-474f-4b9b-8bba-32b682ef9fa8",
               "name": "Analysis completed successfully",
               "originalRequest": {
                 "url": {
@@ -720,7 +720,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"repoUrl\": \"https://github.com/EMSs/K\"\n}",
+                  "raw": "{\n  \"repoUrl\": \"https://github.com/sx_4bX9wRO/uTEzcEmj\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -742,7 +742,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "43070299-3579-4350-b67a-8dd7e9ebd878",
+              "id": "b7717add-dd2c-421c-b87a-160e99626134",
               "name": "Invalid repository URL",
               "originalRequest": {
                 "url": {
@@ -771,7 +771,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"repoUrl\": \"https://github.com/EMSs/K\"\n}",
+                  "raw": "{\n  \"repoUrl\": \"https://github.com/sx_4bX9wRO/uTEzcEmj\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -793,7 +793,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "014dfd04-8d29-4ac6-8fca-ceef0ed1a72d",
+              "id": "88e6a5a2-3f3e-46c4-9962-9666504370b9",
               "name": "Repository not found",
               "originalRequest": {
                 "url": {
@@ -822,7 +822,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"repoUrl\": \"https://github.com/EMSs/K\"\n}",
+                  "raw": "{\n  \"repoUrl\": \"https://github.com/sx_4bX9wRO/uTEzcEmj\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -850,7 +850,7 @@
           }
         },
         {
-          "id": "e7d1fd08-ac19-466c-8241-befad594b904",
+          "id": "0b06245e-9603-4ab9-8d36-7c34a1679c36",
           "name": "List all analyses",
           "request": {
             "name": "List all analyses",
@@ -883,7 +883,7 @@
           },
           "response": [
             {
-              "id": "61ac1e6e-89fa-4644-973b-43c55adf52a5",
+              "id": "767aa1d5-c82a-4072-b926-83c0e518077d",
               "name": "OK",
               "originalRequest": {
                 "url": {
@@ -927,7 +927,7 @@
           }
         },
         {
-          "id": "8360c98b-2f5e-4f18-86b9-55d393cb6824",
+          "id": "6176605f-e88c-44b1-88d3-0f236b63ecdd",
           "name": "Get analysis by ID",
           "request": {
             "name": "Get analysis by ID",
@@ -972,7 +972,7 @@
           },
           "response": [
             {
-              "id": "b7ca713b-0eb2-4004-af72-6dc71a4b136f",
+              "id": "e18a81bd-bd8d-4552-9c33-7b69b18ca1bf",
               "name": "Analysis found",
               "originalRequest": {
                 "url": {
@@ -1022,7 +1022,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "d98f00cc-dfcd-4bb4-b42c-21ff5bbfe9bb",
+              "id": "011fdc25-0d36-4934-ae39-55060b361c40",
               "name": "Analysis not found",
               "originalRequest": {
                 "url": {
@@ -1084,7 +1084,7 @@
       "description": "",
       "item": [
         {
-          "id": "2335f718-3d48-47eb-b79e-1e95d320d6a9",
+          "id": "65d44fb5-7a7b-435b-bda3-9465f318e3aa",
           "name": "home",
           "request": {
             "name": "home",
@@ -1111,7 +1111,7 @@
           },
           "response": [
             {
-              "id": "ac648f05-687d-4948-a6cd-3847014b73e8",
+              "id": "064b8289-4fb2-4caa-86e7-a3e7cf016e95",
               "name": "OK",
               "originalRequest": {
                 "url": {
@@ -1162,9 +1162,9 @@
     }
   ],
   "info": {
-    "_postman_id": "d86e0474-6fcb-477a-a678-34c4b1715861",
+    "_postman_id": "fa57303f-67d7-4205-be35-9aa76c368ec6",
     "name": "Service Portfolio API - Auto-generated",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Collection auto-generated from OpenAPI spec.\n\nDate: 2026-02-13 18:29 UTC\nEnvironment: dev\n\nGenerated by GitHub Actions workflow."
+    "description": "Collection auto-generated from OpenAPI spec.\n\nDate: 2026-02-13 18:32 UTC\nEnvironment: dev\n\nGenerated by GitHub Actions workflow."
   }
 }
