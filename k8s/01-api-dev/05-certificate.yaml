@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: service-portfolio-api-dev-tls
+  namespace: service-portfolio
+  labels:
+    app: service-portfolio-api-dev
+    environment: development
+spec:
+  secretName: service-portfolio-api-dev-tls
+  issuerRef:
+    name: cloudflare-clusterissuer
+    kind: ClusterIssuer
+  dnsNames:
+    - serviceportfolioapi-dev.pablohgdev.com
+  duration: 2160h
+  renewBefore: 720h

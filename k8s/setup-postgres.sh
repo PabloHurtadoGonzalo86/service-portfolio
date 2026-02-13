@@ -1,11 +1,17 @@
 #!/bin/bash
-# Instalar PostgreSQL en el namespace service-portfolio via Bitnami Helm chart
-# Ejecutar desde una maquina con acceso al cluster (kubectl configurado)
+# Install PostgreSQL in the service-portfolio namespace via Bitnami Helm chart
+# Run from a machine with kubectl access to the cluster
 
-# 1. Crear namespace
-kubectl apply -f namespace.yml
+set -euo pipefail
 
-# 2. Instalar PostgreSQL
+echo "=== Service Portfolio - PostgreSQL Setup ==="
+
+# 1. Create namespace
+echo "Creating namespace..."
+kubectl apply -f 01-api-dev/00-namespace.yaml
+
+# 2. Install PostgreSQL via Helm
+echo "Installing PostgreSQL..."
 helm install postgresql bitnami/postgresql -n service-portfolio \
   --set auth.username=serviceportfolio \
   --set auth.password=<YOUR_PASSWORD> \
@@ -17,13 +23,12 @@ helm install postgresql bitnami/postgresql -n service-portfolio \
   --set primary.resources.limits.cpu=500m \
   --set primary.resources.limits.memory=512Mi
 
-echo "PostgreSQL instalado. URL interna: jdbc:postgresql://postgresql.service-portfolio.svc.cluster.local:5432/serviceportfolio"
-
-# 3. Aplicar secrets (copiar secrets.yml.example a secrets.yml, rellenar valores reales)
-# cp secrets.yml.example secrets.yml
-# kubectl apply -f secrets.yml
-
-# 4. Desplegar la app
-# kubectl apply -f deployment.yml
-# kubectl apply -f service.yml
-# kubectl apply -f ingress.yml
+echo ""
+echo "PostgreSQL installed."
+echo "Internal URL: jdbc:postgresql://postgresql.service-portfolio.svc.cluster.local:5432/serviceportfolio"
+echo ""
+echo "=== Next steps ==="
+echo "1. Fill in real values in k8s/01-api-dev/01-secret.yaml and k8s/02-api-prod/01-secret.yaml"
+echo "2. Apply secrets:  kubectl apply -f k8s/01-api-dev/01-secret.yaml"
+echo "3. Apply dev:      kubectl apply -f k8s/01-api-dev/"
+echo "4. Apply prod:     kubectl apply -f k8s/02-api-prod/"
