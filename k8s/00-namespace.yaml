@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: service-portfolio
+  labels:
+    name: service-portfolio
+    app: service-portfolio-api

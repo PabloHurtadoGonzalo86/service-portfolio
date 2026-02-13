@@ -3,11 +3,16 @@ kind: Service
 metadata:
   name: service-portfolio-api-dev
   namespace: service-portfolio
-spec:
-  selector:
+  labels:
     app: service-portfolio-api-dev
+    environment: development
+spec:
+  type: ClusterIP
   ports:
-    - port: 8080
+    - name: http
+      port: 8080
       targetPort: 8080
       protocol: TCP
-  type: ClusterIP
+  selector:
+    app: service-portfolio-api-dev
+    environment: development
