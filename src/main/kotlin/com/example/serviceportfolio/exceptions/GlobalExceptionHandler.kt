@@ -54,5 +54,12 @@ class GlobalExceptionHandler {
         return problem
     }
 
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument(ex: IllegalArgumentException): ProblemDetail {
+        val problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Resource not found")
+        problem.title = "Not Found"
+        return problem
+    }
+
 
 }
