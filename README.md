@@ -17,6 +17,8 @@ REST API that analyzes GitHub repositories and generates professional developer 
 - **Spring AI** 2.0.0-M2 (OpenAI)
 - **hub4j/github-api** for GitHub integration
 - **PostgreSQL** for persistence
+- **Redis** for caching (Spring Cache)
+- **Bucket4j** for API rate limiting
 - **Spring Security** OAuth2 (GitHub OAuth + GitHub App)
 
 ## API Endpoints
@@ -37,6 +39,7 @@ REST API that analyzes GitHub repositories and generates professional developer 
 
 - Java 24
 - PostgreSQL
+- **Redis** (for caching)
 - GitHub App (for repo reading)
 - GitHub OAuth App (for user commits)
 - OpenAI API key
@@ -55,7 +58,13 @@ DB_PORT=5432
 DB_NAME=serviceportfolio
 DB_USERNAME=serviceportfolio
 DB_PASSWORD=your-db-password
+# Redis configuration (optional - defaults to localhost:6379)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
 ```
+
+> **Note**: See `REDIS_CONFIG.md` for detailed Redis and caching configuration.
 
 ### Run locally
 
@@ -79,19 +88,44 @@ docker run -p 8080:8080 --env-file .env service-portfolio
 ## Architecture
 
 ```
-controller/           -> REST endpoints
+controller/           -> REST endpoints (with rate limiting)
 service/
-  GitHubRepoService       -> Read repos with hub4j (GitHub App token)
+  GitHubRepoService       -> Read repos with hub4j (GitHub App token) + caching
   AiAnalysisService       -> AI analysis with Spring AI ChatClient
   ReadmeCommitService     -> Commit README with user OAuth token
-  PortfolioGenerationService -> Orchestrate portfolio generation
+  PortfolioGenerationService -> Orchestrate portfolio generation + caching
+  GitHubRateLimitService  -> Monitor GitHub API rate limits
 client/
   GitHubAppTokenService   -> GitHub App installation token management
 config/
   SecurityConfig          -> Spring Security + OAuth2 + CORS
+  CacheConfig             -> Redis cache configuration (TTL: 1h repos, 24h portfolios)
+  RateLimitConfig         -> Bucket4j rate limiting (10/min analyze, 5/min portfolio)
   AiConfig                -> ChatClient bean
   GitHubConfig            -> hub4j GitHub bean
+filter/
+  RateLimitFilter         -> IP-based rate limiting with X-RateLimit headers
 ```
+
+## Rate Limiting & Caching
+
+### API Rate Limits (per IP address)
+- `/api/v1/repos/analyze`: **10 requests/minute**
+- `/api/v1/portfolio/generate`: **5 requests/minute**
+- Other endpoints: **60 requests/minute**
+
+Responses include standard rate limit headers:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Requests remaining
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
+- `Retry-After`: Seconds to wait (on 429 responses)
+
+### Caching Strategy
+- **Repo metadata**: 1 hour TTL (Redis)
+- **User repo lists**: 15 minutes TTL (Redis)
+- **Portfolio results**: 24 hours TTL (Redis)
+- **Analysis results**: 24 hours TTL (Redis)
+- **GitHub API rate limit**: Monitored before API calls
 
 ## Deployment
 
