@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-portfolio-api-dev
+  namespace: service-portfolio
+  labels:
+    app: service-portfolio-api-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-portfolio-api-dev
+  template:
+    metadata:
+      labels:
+        app: service-portfolio-api-dev
+      annotations:
+        keel.sh/policy: force
+        keel.sh/trigger: poll
+        keel.sh/pollSchedule: "@every 1m"
+    spec:
+      containers:
+        - name: api
+          image: ocholoko888/service-portfolio:develop
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: service-portfolio-secrets
+          env:
+            - name: GITHUB_APP_PRIVATE_KEY_PATH
+              value: /secrets/github-app/private-key.pem
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: validate
+            - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+              value: "true"
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx512m"
+          volumeMounts:
+            - name: github-app-key
+              mountPath: /secrets/github-app
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 768Mi
+      volumes:
+        - name: github-app-key
+          secret:
+            secretName: github-app-private-key
