@@ -25,8 +25,8 @@ export function PortfolioPage() {
       try {
         const data = await portfolioApi.getPortfolio(Number(id));
         setPortfolio(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load portfolio');
+      } catch (err) {
+        setError((err as Error).message || 'Failed to load portfolio');
       } finally {
         setLoading(false);
       }

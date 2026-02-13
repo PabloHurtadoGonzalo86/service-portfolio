@@ -43,3 +43,9 @@ application.yaml
 /service-portfolio-pablohg-dev.2026-02-11.private-key.pem
 /service-portfolio-pkcs8.pem
 k8s/secrets.yml
+
+### Frontend ###
+frontend/node_modules
+frontend/dist
+frontend/.env.local
+
