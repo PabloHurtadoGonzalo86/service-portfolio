@@ -5,7 +5,7 @@
       "description": "Generate professional developer portfolios from GitHub profiles",
       "item": [
         {
-          "id": "909599cf-aac2-470d-82ff-ca68e857a4e7",
+          "id": "91b2d237-ba2a-4f63-bcbf-2922ff09a292",
           "name": "Generate developer portfolio",
           "request": {
             "name": "Generate developer portfolio",
@@ -51,7 +51,7 @@
           },
           "response": [
             {
-              "id": "ae81e8e2-84cd-4707-ab6a-4c159a8e6f86",
+              "id": "023bf177-0944-4c09-8d76-d33d58ceb528",
               "name": "Portfolio generated successfully",
               "originalRequest": {
                 "url": {
@@ -97,12 +97,12 @@
                   "value": "*/*"
                 }
               ],
-              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
+              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"key_1\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
               "cookie": [],
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "0bd194e7-df40-4f95-a38b-e24449dcfd4f",
+              "id": "8d45c153-8b83-4028-a87e-8269b6e42b09",
               "name": "Invalid GitHub username",
               "originalRequest": {
                 "url": {
@@ -148,12 +148,12 @@
                   "value": "*/*"
                 }
               ],
-              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
+              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"key_1\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
               "cookie": [],
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "ef4ee5aa-fd9f-4455-b0ad-a83c6b6687ff",
+              "id": "f48f51d5-ab77-40e8-b96f-843fbea862f0",
               "name": "GitHub user not found",
               "originalRequest": {
                 "url": {
@@ -199,7 +199,7 @@
                   "value": "*/*"
                 }
               ],
-              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
+              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"key_1\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
               "cookie": [],
               "_postman_previewlanguage": "text"
             }
@@ -210,7 +210,7 @@
           }
         },
         {
-          "id": "9a1bd3bc-72ee-497c-a873-f9338cd5c421",
+          "id": "c517c56b-9117-4997-9054-d9e7210af483",
           "name": "List all portfolios",
           "request": {
             "name": "List all portfolios",
@@ -242,7 +242,7 @@
           },
           "response": [
             {
-              "id": "c61dd44b-788b-49c8-9ec2-ef91d88a5ce8",
+              "id": "39239941-c159-4d90-b1ac-aa0c0311caff",
               "name": "OK",
               "originalRequest": {
                 "url": {
@@ -285,7 +285,7 @@
           }
         },
         {
-          "id": "279ba138-66ec-4b05-b8fa-b19e4dcfaaa8",
+          "id": "208b8d61-4337-4939-87b4-e62294cadfac",
           "name": "Get portfolio by ID",
           "request": {
             "name": "Get portfolio by ID",
@@ -326,7 +326,7 @@
           },
           "response": [
             {
-              "id": "1d49c45a-a31e-4a0c-a47f-39973a078c50",
+              "id": "e0853c05-5dbc-4cb5-a427-53d6d759f672",
               "name": "Portfolio found",
               "originalRequest": {
                 "url": {
@@ -370,12 +370,12 @@
                   "value": "*/*"
                 }
               ],
-              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
+              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"key_1\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
               "cookie": [],
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "c54a5400-c5a3-495e-9bb9-3d11b36c6e96",
+              "id": "fa46279e-b750-4909-b10e-64a5c336a303",
               "name": "Portfolio not found",
               "originalRequest": {
                 "url": {
@@ -419,7 +419,7 @@
                   "value": "*/*"
                 }
               ],
-              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
+              "body": "{\n  \"id\": \"<long>\",\n  \"githubUsername\": \"<string>\",\n  \"developerName\": \"<string>\",\n  \"professionalSummary\": \"<string>\",\n  \"topSkills\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"selectedProjects\": [\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    },\n    {\n      \"repoName\": \"<string>\",\n      \"repoUrl\": \"<string>\",\n      \"description\": \"<string>\",\n      \"techStack\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"whyNotable\": \"<string>\",\n      \"category\": \"<string>\"\n    }\n  ],\n  \"skillsByCategory\": {\n    \"key_0\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"key_1\": [\n      \"<string>\",\n      \"<string>\"\n    ]\n  },\n  \"profileHighlights\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"totalPublicRepos\": \"<integer>\",\n  \"createdAt\": \"<dateTime>\"\n}",
               "cookie": [],
               "_postman_previewlanguage": "text"
             }
@@ -436,7 +436,7 @@
       "description": "Analyze GitHub repositories and generate READMEs",
       "item": [
         {
-          "id": "cc62f412-bc43-4733-9177-9d4a25030c75",
+          "id": "f50c6414-7a6a-4bd3-938a-b2da5c870d91",
           "name": "Commit README to repository",
           "request": {
             "name": "Commit README to repository",
@@ -471,7 +471,7 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/xDZytR5c74/ZJmWWE8Z-E\"\n}",
+              "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/Df5L/MlBuf.git\"\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -483,7 +483,7 @@
           },
           "response": [
             {
-              "id": "c7cc890c-393a-408b-a8a2-f6620d9b5d47",
+              "id": "7df9c74d-28a2-48e5-ac8a-933e6d75c97d",
               "name": "README committed successfully",
               "originalRequest": {
                 "url": {
@@ -513,7 +513,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/xDZytR5c74/ZJmWWE8Z-E\"\n}",
+                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/Df5L/MlBuf.git\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -535,7 +535,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "834a10f2-12fa-4379-afb2-88756b9dc198",
+              "id": "55c80643-2331-4c40-9c82-14a12848d3cc",
               "name": "OAuth authentication required",
               "originalRequest": {
                 "url": {
@@ -565,7 +565,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/xDZytR5c74/ZJmWWE8Z-E\"\n}",
+                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/Df5L/MlBuf.git\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -587,7 +587,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "43259f80-a8a1-4f76-8710-bc40afdf9f02",
+              "id": "65c3c6d1-0bbb-40bc-8563-f396c233309b",
               "name": "GitHub API error during commit",
               "originalRequest": {
                 "url": {
@@ -617,7 +617,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/xDZytR5c74/ZJmWWE8Z-E\"\n}",
+                  "raw": "{\n  \"readmeContent\": \"<string>\",\n  \"repoUrl\": \"https://github.com/Df5L/MlBuf.git\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -645,7 +645,7 @@
           }
         },
         {
-          "id": "6823b1fb-65ed-4736-a7a0-46b8aa7cab93",
+          "id": "8906ad98-00ee-4bba-a70c-802d3f575719",
           "name": "Analyze a GitHub repository",
           "request": {
             "name": "Analyze a GitHub repository",
@@ -679,7 +679,7 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"repoUrl\": \"https://github.com/T7UPcy/dPv1dW.Xrh.\"\n}",
+              "raw": "{\n  \"repoUrl\": \"https://github.com/LfPzEg7tHG/xg7D.git\"\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -691,7 +691,7 @@
           },
           "response": [
             {
-              "id": "b01ad767-42a5-4862-b6a1-5a07c9b8ef53",
+              "id": "61b9b958-900b-4e1c-8b52-9e80a063d899",
               "name": "Analysis completed successfully",
               "originalRequest": {
                 "url": {
@@ -720,7 +720,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"repoUrl\": \"https://github.com/T7UPcy/dPv1dW.Xrh.\"\n}",
+                  "raw": "{\n  \"repoUrl\": \"https://github.com/LfPzEg7tHG/xg7D.git\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -742,7 +742,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "c48e87e7-bd7c-4147-9c2f-6e78d05480eb",
+              "id": "f368540c-a4cc-46b1-adde-3e248d05480c",
               "name": "Invalid repository URL",
               "originalRequest": {
                 "url": {
@@ -771,7 +771,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"repoUrl\": \"https://github.com/T7UPcy/dPv1dW.Xrh.\"\n}",
+                  "raw": "{\n  \"repoUrl\": \"https://github.com/LfPzEg7tHG/xg7D.git\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -793,7 +793,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "be84aeaa-dd14-4fb9-ba8f-1562435650d9",
+              "id": "0126311f-a13b-492f-a938-f3770ae97ba6",
               "name": "Repository not found",
               "originalRequest": {
                 "url": {
@@ -822,7 +822,7 @@
                 "method": "POST",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"repoUrl\": \"https://github.com/T7UPcy/dPv1dW.Xrh.\"\n}",
+                  "raw": "{\n  \"repoUrl\": \"https://github.com/LfPzEg7tHG/xg7D.git\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -850,7 +850,7 @@
           }
         },
         {
-          "id": "a94b17e7-2f6c-4471-b8cc-5fac48f875ca",
+          "id": "c41b1cea-5041-4e45-ac21-2eb729139b0b",
           "name": "List all analyses",
           "request": {
             "name": "List all analyses",
@@ -883,7 +883,7 @@
           },
           "response": [
             {
-              "id": "098772fb-1577-4311-9242-61aed3be0a80",
+              "id": "c9eefd88-e8a6-4d88-b06e-bc474d810df0",
               "name": "OK",
               "originalRequest": {
                 "url": {
@@ -927,7 +927,7 @@
           }
         },
         {
-          "id": "73df9ef6-5ec2-49e0-90d2-415e6d9a4600",
+          "id": "0eb6fd32-726b-4a33-85a5-1ca5508bbbc1",
           "name": "Get analysis by ID",
           "request": {
             "name": "Get analysis by ID",
@@ -972,7 +972,7 @@
           },
           "response": [
             {
-              "id": "b28d14e5-1f24-4539-a947-ae1813e4e7b2",
+              "id": "9d098487-4d64-4908-a128-ef0d1fb4abd2",
               "name": "Analysis found",
               "originalRequest": {
                 "url": {
@@ -1022,7 +1022,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "e29b1e34-96af-4855-a340-01448c7342e7",
+              "id": "efc5537f-2323-4053-8919-06b2ac19ad45",
               "name": "Analysis not found",
               "originalRequest": {
                 "url": {
@@ -1084,7 +1084,7 @@
       "description": "",
       "item": [
         {
-          "id": "8bcd36b3-f549-47f1-8c57-eb9c7944f71b",
+          "id": "689682e7-5bc3-4eda-9c6e-54d48ca06e2f",
           "name": "home",
           "request": {
             "name": "home",
@@ -1111,7 +1111,7 @@
           },
           "response": [
             {
-              "id": "095c2b94-ff12-4b31-843f-a1dbbf7d24e5",
+              "id": "948f0eb4-d2f5-4c80-9234-f3b0f102cc5e",
               "name": "OK",
               "originalRequest": {
                 "url": {
@@ -1162,9 +1162,9 @@
     }
   ],
   "info": {
-    "_postman_id": "8d5b6fae-09ad-4c2b-9d9c-528b5d864e82",
+    "_postman_id": "f3eb9c9c-99a8-4bc6-a8aa-5d11d0ce496e",
     "name": "Service Portfolio API - Auto-generated",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Collection auto-generated from OpenAPI spec.\n\nDate: 2026-02-13 16:53 UTC\nEnvironment: dev\n\nGenerated by GitHub Actions workflow."
+    "description": "Collection auto-generated from OpenAPI spec.\n\nDate: 2026-02-13 17:37 UTC\nEnvironment: dev\n\nGenerated by GitHub Actions workflow."
   }
 }
