@@ -25,6 +25,7 @@ repositories {
 
 extra["springAiVersion"] = "2.0.0-M2"
 extra["netty.version"] = "4.2.9.Final"
+extra["bucket4jVersion"] = "8.14.0"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -49,8 +50,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("com.bucket4j:bucket4j-core:8.14.0")
-    implementation("com.bucket4j:bucket4j-redis:8.14.0")
+    implementation("com.bucket4j:bucket4j-core:${property("bucket4jVersion")}")
+    implementation("com.bucket4j:bucket4j-redis:${property("bucket4jVersion")}")
     testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-client-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")

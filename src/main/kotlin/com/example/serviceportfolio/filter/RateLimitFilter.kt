@@ -19,6 +19,10 @@ class RateLimitFilter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
     
+    companion object {
+        private const val BUCKET_RESET_WINDOW_MS = 60000L // 1 minute in milliseconds
+    }
+    
     // Store bucket creation time to calculate reset time
     private val bucketResetTimes: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
@@ -40,11 +44,11 @@ class RateLimitFilter(
         
         val bucket = rateLimitBuckets.computeIfAbsent(bucketKey) { 
             val now = System.currentTimeMillis()
-            bucketResetTimes[bucketKey] = now + 60000 // 1 minute from now
+            bucketResetTimes[bucketKey] = now + BUCKET_RESET_WINDOW_MS
             createBucketForPath(path)
         }
         
-        val resetTime = bucketResetTimes.getOrDefault(bucketKey, System.currentTimeMillis() + 60000)
+        val resetTime = bucketResetTimes.getOrDefault(bucketKey, System.currentTimeMillis() + BUCKET_RESET_WINDOW_MS)
 
         val probe = bucket.tryConsumeAndReturnRemaining(1)
         

@@ -14,7 +14,9 @@ class GitHubRateLimitService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
-        private const val RATE_LIMIT_THRESHOLD = 100 // Minimum remaining requests before warning
+        // Log a warning when remaining requests fall below this threshold
+        // This helps administrators monitor API usage before hitting the limit
+        private const val RATE_LIMIT_THRESHOLD = 100
     }
 
     fun checkRateLimit(): RateLimitInfo {
