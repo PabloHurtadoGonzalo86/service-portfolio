@@ -32,7 +32,8 @@ class OpenApiConfig {
         .servers(
             listOf(
                 Server().url("https://serviceportfolioapi.pablohgdev.com").description("Production"),
-                Server().url("http://localhost:8080").description("Local development")
+                Server().url("https://serviceportfolioapi-dev.pablohgdev.com").description("Development"),
+                Server().url("http://localhost:8080").description("Local")
             )
         )
 }
