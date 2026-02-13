@@ -8,6 +8,8 @@ spring:
   sql:
     init:
       mode: always
+  flyway:
+    enabled: false
   security:
     oauth2:
       client:
