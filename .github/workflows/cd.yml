@@ -3,6 +3,12 @@ name: CD
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - 'openapi.json'
+      - '*.postman_collection.json'
+      - '**.md'
+      - 'docs/**'
+      - 'k8s/**'
 
 permissions:
   contents: read
