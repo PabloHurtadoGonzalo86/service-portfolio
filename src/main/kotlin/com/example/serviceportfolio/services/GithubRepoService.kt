@@ -1,6 +1,7 @@
 package com.example.serviceportfolio.services
 
 import com.example.serviceportfolio.client.GitHubAppTokenService
+import com.example.serviceportfolio.config.CacheConfig
 import com.example.serviceportfolio.models.RepoContext
 import com.example.serviceportfolio.models.RepoSummary
 import com.example.serviceportfolio.exceptions.GitHubApiException
@@ -10,12 +11,14 @@ import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.GitHubBuilder
 import org.kohsuke.github.HttpException
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.io.IOException
 
 @Service
 class GitHubRepoService(
-    private val tokenService: GitHubAppTokenService
+    private val tokenService: GitHubAppTokenService,
+    private val rateLimitService: GitHubRateLimitService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -39,9 +42,15 @@ class GitHubRepoService(
         )
     }
 
+    @Cacheable(value = [CacheConfig.REPO_CONTEXT_CACHE], key = "#repoUrl")
     fun getRepoContext(repoUrl: String): RepoContext {
         val (owner, repo) = GitHubUrlParser.parse(repoUrl)
         logger.info("Fetching repo context for {}/{}", owner, repo)
+
+        // Check GitHub API rate limit before making requests
+        if (!rateLimitService.hasAvailableRequests()) {
+            throw GitHubApiException("GitHub API rate limit exceeded. Please try again later.")
+        }
 
         try {
             val gitHub = GitHubBuilder()
@@ -120,8 +129,14 @@ class GitHubRepoService(
         return result
     }
 
+    @Cacheable(value = [CacheConfig.USER_REPOS_CACHE], key = "#username")
     fun listUserRepos(username: String): List<RepoSummary> {
         logger.info("Listing repositories for user: {}", username)
+
+        // Check GitHub API rate limit before making requests
+        if (!rateLimitService.hasAvailableRequests()) {
+            throw GitHubApiException("GitHub API rate limit exceeded. Please try again later.")
+        }
 
         try {
             val gitHub = GitHubBuilder()

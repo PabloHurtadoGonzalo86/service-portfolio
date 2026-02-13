@@ -1,5 +1,6 @@
 package com.example.serviceportfolio.controller
 
+import com.example.serviceportfolio.config.CacheConfig
 import com.example.serviceportfolio.dtos.AnalysisResponse
 import com.example.serviceportfolio.dtos.AnalyzeRepoRequest
 import com.example.serviceportfolio.dtos.ReadmeCommitRequest
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.ResponseEntity
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient
@@ -67,6 +69,7 @@ class AnalysisController(
     @Operation(summary = "Get analysis by ID", description = "Returns a specific repository analysis")
     @ApiResponse(responseCode = "200", description = "Analysis found")
     @ApiResponse(responseCode = "404", description = "Analysis not found")
+    @Cacheable(value = [CacheConfig.ANALYSIS_CACHE], key = "#id")
     @GetMapping("/analyses/{id}")
     fun getAnalysis(@PathVariable id: Long): ResponseEntity<AnalysisResponse> {
         val result = analysisResultRepository.findById(id)

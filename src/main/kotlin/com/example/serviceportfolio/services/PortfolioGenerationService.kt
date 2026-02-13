@@ -1,5 +1,6 @@
 package com.example.serviceportfolio.services
 
+import com.example.serviceportfolio.config.CacheConfig
 import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
 import com.example.serviceportfolio.entities.Portfolio
@@ -8,6 +9,8 @@ import com.example.serviceportfolio.models.DeveloperPortfolio
 import com.example.serviceportfolio.repositories.PortfolioRepository
 import tools.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,6 +23,7 @@ class PortfolioGenerationService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @CacheEvict(value = [CacheConfig.PORTFOLIO_CACHE], key = "#githubUsername")
     fun generate(githubUsername: String): PortfolioResponse {
         logger.info("Generating portfolio for: {}", githubUsername)
 
@@ -41,6 +45,7 @@ class PortfolioGenerationService(
         return toResponse(saved, portfolio)
     }
 
+    @Cacheable(value = [CacheConfig.PORTFOLIO_CACHE], key = "#id")
     fun getById(id: Long): PortfolioResponse {
         val entity = portfolioRepository.findById(id)
             .orElseThrow { RepoNotFoundException("Portfolio not found with id: $id") }
