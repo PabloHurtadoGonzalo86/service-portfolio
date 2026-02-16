@@ -33,7 +33,8 @@ class AuthController {
                 avatarUrl = user.avatarUrl,
                 plan = user.plan,
                 analysesUsed = user.analysesUsed,
-                portfoliosUsed = user.portfoliosUsed
+                portfoliosUsed = user.portfoliosUsed,
+                usageResetAt = user.usageResetAt
             )
         )
     }

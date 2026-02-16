@@ -10,13 +10,19 @@ import com.example.serviceportfolio.security.CustomOAuth2User
 import com.example.serviceportfolio.security.CustomOAuth2UserService
 import com.example.serviceportfolio.security.OAuth2LoginSuccessHandler
 import com.example.serviceportfolio.services.PortfolioGenerationService
+import com.example.serviceportfolio.services.UsageLimitService
+import com.example.serviceportfolio.exceptions.UsageLimitExceededException
+import org.mockito.kotlin.doThrow
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
+import com.example.serviceportfolio.filter.RateLimitFilter
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User
@@ -33,7 +39,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
 import java.util.UUID
 
-@WebMvcTest(PortfolioController::class)
+@WebMvcTest(
+    controllers = [PortfolioController::class],
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [RateLimitFilter::class])]
+)
 @Import(AsyncConfig::class)
 class PortfolioControllerTest {
 
@@ -42,6 +51,9 @@ class PortfolioControllerTest {
 
     @MockitoBean
     private lateinit var portfolioGenerationService: PortfolioGenerationService
+
+    @MockitoBean
+    private lateinit var usageLimitService: UsageLimitService
 
     @MockitoBean
     private lateinit var customOAuth2UserService: CustomOAuth2UserService
@@ -270,5 +282,24 @@ class PortfolioControllerTest {
                 .content("""{"githubUsername": "testuser"}""")
         )
             .andExpect(status().is3xxRedirection)
+    }
+
+    // --- Usage Limits ---
+
+    @Test
+    fun `generate portfolio returns 403 when usage limit exceeded`() {
+        val customUser = createCustomOAuth2User()
+
+        doThrow(UsageLimitExceededException("Monthly portfolio limit reached (3/3). Resets at 2026-03-01T00:00:00Z."))
+            .`when`(usageLimitService).checkPortfolioLimit(any())
+
+        mockMvc.perform(
+            post("/api/v1/portfolio/generate")
+                .with(oauth2Login().oauth2User(customUser))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"githubUsername": "testuser"}""")
+        )
+            .andExpect(status().isForbidden)
     }
 }

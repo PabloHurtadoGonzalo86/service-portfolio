@@ -1,5 +1,6 @@
 package com.example.serviceportfolio.dtos
 
+import java.time.Instant
 import java.util.UUID
 
 data class UserResponse(
@@ -10,5 +11,6 @@ data class UserResponse(
     val avatarUrl: String?,
     val plan: String,
     val analysesUsed: Int,
-    val portfoliosUsed: Int
+    val portfoliosUsed: Int,
+    val usageResetAt: Instant
 )
