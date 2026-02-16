@@ -60,6 +60,13 @@ class GlobalExceptionHandler {
         return problem
     }
 
+    @ExceptionHandler(UsageLimitExceededException::class)
+    fun handleUsageLimit(ex: UsageLimitExceededException): ProblemDetail {
+        val problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.message ?: "Usage limit exceeded")
+        problem.title = "Usage Limit Exceeded"
+        return problem
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ProblemDetail {
         val errors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }

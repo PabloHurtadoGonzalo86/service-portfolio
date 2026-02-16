@@ -5,6 +5,7 @@ import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
 import com.example.serviceportfolio.security.SecurityUtils
 import com.example.serviceportfolio.services.PortfolioGenerationService
+import com.example.serviceportfolio.services.UsageLimitService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -21,6 +22,7 @@ import org.springframework.web.context.request.async.DeferredResult
 @Tag(name = "Portfolio Generation", description = "Generate professional developer portfolios from GitHub profiles")
 class PortfolioController(
     private val portfolioGenerationService: PortfolioGenerationService,
+    private val usageLimitService: UsageLimitService,
     @Qualifier("aiTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
 ) {
 
@@ -34,6 +36,7 @@ class PortfolioController(
     fun generatePortfolio(@Valid @RequestBody request: GeneratePortfolioRequest): DeferredResult<ResponseEntity<PortfolioResponse>> {
         logger.info("Portfolio generation requested for: {}", request.githubUsername)
         val currentUser = SecurityUtils.getCurrentUser()
+        currentUser?.let { usageLimitService.checkPortfolioLimit(it) }
 
         val deferredResult = DeferredResult<ResponseEntity<PortfolioResponse>>(120_000L)
         deferredResult.onTimeout {
@@ -46,6 +49,7 @@ class PortfolioController(
         taskExecutor.execute {
             try {
                 val response = portfolioGenerationService.generate(request.githubUsername, currentUser)
+                currentUser?.let { usageLimitService.incrementPortfolioUsage(it) }
                 deferredResult.setResult(ResponseEntity.ok(response))
             } catch (e: Exception) {
                 logger.error("Error generating portfolio for {}: {}", request.githubUsername, e.message)

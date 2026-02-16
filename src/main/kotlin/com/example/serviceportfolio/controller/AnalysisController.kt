@@ -11,6 +11,7 @@ import com.example.serviceportfolio.security.SecurityUtils
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
+import com.example.serviceportfolio.services.UsageLimitService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -32,6 +33,7 @@ class AnalysisController(
     private val aiAnalysisService: AiAnalysisService,
     private val analysisResultRepository: AnalysisResultRepository,
     private val readmeCommitService: ReadmeCommitService,
+    private val usageLimitService: UsageLimitService,
     @Qualifier("aiTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
 ) {
 
@@ -45,6 +47,7 @@ class AnalysisController(
     fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): DeferredResult<ResponseEntity<AnalysisResponse>> {
         logger.info("Solicitud de análisis recibida para: {}", request.repoUrl)
         val currentUser = SecurityUtils.getCurrentUser()
+        currentUser?.let { usageLimitService.checkAnalysisLimit(it) }
 
         val deferredResult = DeferredResult<ResponseEntity<AnalysisResponse>>(120_000L)
         deferredResult.onTimeout {
@@ -76,6 +79,7 @@ class AnalysisController(
                 ).apply { user = currentUser }
                 val saved = analysisResultRepository.save(entity)
 
+                currentUser?.let { usageLimitService.incrementAnalysisUsage(it) }
                 logger.info("Análisis guardado con id: {}", saved.id)
                 deferredResult.setResult(ResponseEntity.ok(saved.toResponse()))
             } catch (e: Exception) {

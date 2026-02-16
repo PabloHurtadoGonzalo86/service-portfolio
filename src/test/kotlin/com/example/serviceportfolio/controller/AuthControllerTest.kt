@@ -72,6 +72,7 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.plan").value("FREE"))
             .andExpect(jsonPath("$.analysesUsed").value(0))
             .andExpect(jsonPath("$.portfoliosUsed").value(0))
+            .andExpect(jsonPath("$.usageResetAt").exists())
     }
 
     @Test

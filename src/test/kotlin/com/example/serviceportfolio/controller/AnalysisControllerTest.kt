@@ -13,12 +13,18 @@ import com.example.serviceportfolio.security.OAuth2LoginSuccessHandler
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
+import com.example.serviceportfolio.services.UsageLimitService
+import com.example.serviceportfolio.exceptions.UsageLimitExceededException
+import org.mockito.kotlin.doThrow
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
+import com.example.serviceportfolio.filter.RateLimitFilter
 import org.springframework.http.MediaType
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority
@@ -36,7 +42,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.Optional
 import java.util.UUID
 
-@WebMvcTest(AnalysisController::class)
+@WebMvcTest(
+    controllers = [AnalysisController::class],
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [RateLimitFilter::class])]
+)
 @Import(AsyncConfig::class)
 class AnalysisControllerTest {
 
@@ -54,6 +63,9 @@ class AnalysisControllerTest {
 
     @MockitoBean
     private lateinit var readmeCommitService: ReadmeCommitService
+
+    @MockitoBean
+    private lateinit var usageLimitService: UsageLimitService
 
     @MockitoBean
     private lateinit var customOAuth2UserService: CustomOAuth2UserService
@@ -300,5 +312,24 @@ class AnalysisControllerTest {
     fun `list my analyses without auth redirects to login`() {
         mockMvc.perform(get("/api/v1/repos/my-analyses"))
             .andExpect(status().is3xxRedirection)
+    }
+
+    // --- Usage Limits ---
+
+    @Test
+    fun `analyze repo returns 403 when usage limit exceeded`() {
+        val customUser = createCustomOAuth2User()
+
+        doThrow(UsageLimitExceededException("Monthly analysis limit reached (5/5). Resets at 2026-03-01T00:00:00Z."))
+            .`when`(usageLimitService).checkAnalysisLimit(any())
+
+        mockMvc.perform(
+            post("/api/v1/repos/analyze")
+                .with(oauth2Login().oauth2User(customUser))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"repoUrl": "https://github.com/owner/repo"}""")
+        )
+            .andExpect(status().isForbidden)
     }
 }
