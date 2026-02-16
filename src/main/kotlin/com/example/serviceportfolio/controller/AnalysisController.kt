@@ -5,11 +5,15 @@ import com.example.serviceportfolio.dtos.AnalyzeRepoRequest
 import com.example.serviceportfolio.dtos.ReadmeCommitRequest
 import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
+import com.example.serviceportfolio.exceptions.AuthenticationRequiredException
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.repositories.AnalysisResultRepository
+import com.example.serviceportfolio.security.SecurityUtils
+import com.example.serviceportfolio.util.TokenEncryptor
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
+import com.example.serviceportfolio.services.UsageLimitService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -18,8 +22,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.request.async.DeferredResult
 
@@ -31,6 +33,8 @@ class AnalysisController(
     private val aiAnalysisService: AiAnalysisService,
     private val analysisResultRepository: AnalysisResultRepository,
     private val readmeCommitService: ReadmeCommitService,
+    private val usageLimitService: UsageLimitService,
+    private val tokenEncryptor: TokenEncryptor,
     @Qualifier("aiTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
 ) {
 
@@ -43,6 +47,8 @@ class AnalysisController(
     @PostMapping("/analyze")
     fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): DeferredResult<ResponseEntity<AnalysisResponse>> {
         logger.info("Solicitud de análisis recibida para: {}", request.repoUrl)
+        val currentUser = SecurityUtils.getCurrentUser()
+        currentUser?.let { usageLimitService.checkAnalysisLimit(it) }
 
         val deferredResult = DeferredResult<ResponseEntity<AnalysisResponse>>(120_000L)
         deferredResult.onTimeout {
@@ -71,9 +77,10 @@ class AnalysisController(
                     techStack = analysis.techStack,
                     detectedFeatures = analysis.detectedFeatures,
                     readmeContent = analysis.readmeMarkdown
-                )
+                ).apply { user = currentUser }
                 val saved = analysisResultRepository.save(entity)
 
+                currentUser?.let { usageLimitService.incrementAnalysisUsage(it) }
                 logger.info("Análisis guardado con id: {}", saved.id)
                 deferredResult.setResult(ResponseEntity.ok(saved.toResponse()))
             } catch (e: Exception) {
@@ -102,18 +109,29 @@ class AnalysisController(
         return ResponseEntity.ok(result.toResponse())
     }
 
+    @Operation(summary = "List my analyses", description = "Returns analyses owned by the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Analyses returned")
+    @ApiResponse(responseCode = "401", description = "Not authenticated")
+    @GetMapping("/my-analyses")
+    fun listMyAnalyses(): ResponseEntity<List<AnalysisResponse>> {
+        val user = SecurityUtils.requireCurrentUser()
+        val results = analysisResultRepository.findAllByUserOrderByCreatedAtDesc(user)
+        return ResponseEntity.ok(results.map { it.toResponse() })
+    }
+
     @Operation(summary = "Commit README to repository", description = "Commits a generated README directly to the user's GitHub repository. Requires OAuth authentication.")
     @ApiResponse(responseCode = "200", description = "README committed successfully")
     @ApiResponse(responseCode = "401", description = "OAuth authentication required")
     @ApiResponse(responseCode = "502", description = "GitHub API error during commit")
     @PostMapping("/readme/commit")
     fun commitReadme(
-        @Valid @RequestBody request: ReadmeCommitRequest,
-        @RegisteredOAuth2AuthorizedClient("github") authorizedClient: OAuth2AuthorizedClient
+        @Valid @RequestBody request: ReadmeCommitRequest
     ): ResponseEntity<ReadmeCommitResponse> {
         logger.info("Solicitud de commit de README recibida para: {}", request.repoUrl)
 
-        val token = authorizedClient.accessToken.tokenValue
+        val user = SecurityUtils.requireCurrentUser()
+        val token = tokenEncryptor.decrypt(user.githubAccessToken)
+            ?: throw AuthenticationRequiredException("GitHub token not available. Please re-login.")
         val response = readmeCommitService.commitReadme(request.repoUrl, request.readmeContent, token)
 
         logger.info("README committed exitosamente, sha: {}", response.commitSha)

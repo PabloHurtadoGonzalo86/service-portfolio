@@ -21,6 +21,13 @@ spring:
     openai:
       api-key: test-key
 
+app:
+  encryption:
+    password: test-encryption-password
+    salt: abcdef0123456789
+  oauth2:
+    success-redirect-url: http://localhost:3000
+
 github:
   app:
     app-id: 12345

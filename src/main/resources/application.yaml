@@ -40,6 +40,14 @@ spring:
     baseline-version: 0
     locations: classpath:db/migration
 
+# --- Encryption ---
+app:
+  encryption:
+    password: ${APP_ENCRYPTION_PASSWORD}
+    salt: ${APP_ENCRYPTION_SALT}
+  oauth2:
+    success-redirect-url: ${APP_OAUTH2_SUCCESS_REDIRECT_URL:http://localhost:3000}
+
 github:
   app:
     app-id: ${GITHUB_APP_CLIENT_ID}                     # ← GitHub App

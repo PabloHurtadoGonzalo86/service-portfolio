@@ -3,17 +3,30 @@ package com.example.serviceportfolio.controller
 import com.example.serviceportfolio.config.AsyncConfig
 import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
+import com.example.serviceportfolio.entities.User
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.models.PortfolioProject
+import com.example.serviceportfolio.security.CustomOAuth2User
+import com.example.serviceportfolio.security.CustomOAuth2UserService
+import com.example.serviceportfolio.security.OAuth2LoginSuccessHandler
 import com.example.serviceportfolio.services.PortfolioGenerationService
+import com.example.serviceportfolio.services.UsageLimitService
+import com.example.serviceportfolio.exceptions.UsageLimitExceededException
+import org.mockito.kotlin.doThrow
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
+import com.example.serviceportfolio.filter.RateLimitFilter
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
+import org.springframework.security.oauth2.core.user.OAuth2UserAuthority
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
@@ -24,8 +37,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
+import java.util.UUID
 
-@WebMvcTest(PortfolioController::class)
+@WebMvcTest(
+    controllers = [PortfolioController::class],
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [RateLimitFilter::class])]
+)
 @Import(AsyncConfig::class)
 class PortfolioControllerTest {
 
@@ -34,6 +51,27 @@ class PortfolioControllerTest {
 
     @MockitoBean
     private lateinit var portfolioGenerationService: PortfolioGenerationService
+
+    @MockitoBean
+    private lateinit var usageLimitService: UsageLimitService
+
+    @MockitoBean
+    private lateinit var customOAuth2UserService: CustomOAuth2UserService
+
+    @MockitoBean
+    private lateinit var oAuth2LoginSuccessHandler: OAuth2LoginSuccessHandler
+
+    private fun createCustomOAuth2User(): CustomOAuth2User {
+        val user = User(
+            githubId = 12345L,
+            githubUsername = "testuser"
+        ).apply { id = UUID.fromString("00000000-0000-0000-0000-000000000001") }
+
+        val attributes = mapOf<String, Any>("id" to 12345L, "login" to "testuser")
+        val authority = OAuth2UserAuthority(attributes)
+        val delegate = DefaultOAuth2User(listOf(authority), attributes, "login")
+        return CustomOAuth2User(delegate, user)
+    }
 
     private fun samplePortfolioResponse() = PortfolioResponse(
         id = 1L,
@@ -76,7 +114,7 @@ class PortfolioControllerTest {
     @Test
     fun `generate portfolio returns 200 with portfolio response`() {
         val response = samplePortfolioResponse()
-        `when`(portfolioGenerationService.generate(any())).thenReturn(response)
+        `when`(portfolioGenerationService.generate(any(), anyOrNull())).thenReturn(response)
 
         val mvcResult = mockMvc.perform(
             post("/api/v1/portfolio/generate")
@@ -115,7 +153,7 @@ class PortfolioControllerTest {
 
     @Test
     fun `generate portfolio returns 404 when user not found`() {
-        `when`(portfolioGenerationService.generate(any()))
+        `when`(portfolioGenerationService.generate(any(), anyOrNull()))
             .thenThrow(RepoNotFoundException("GitHub user not found: nonexistent"))
 
         val mvcResult = mockMvc.perform(
@@ -199,5 +237,69 @@ class PortfolioControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
             .andExpect(jsonPath("$").isEmpty)
+    }
+
+    // --- GET /api/v1/portfolio/my-portfolios ---
+
+    @Test
+    fun `list my portfolios returns 200 with user portfolios`() {
+        val summary = PortfolioSummaryResponse(
+            id = 1L,
+            githubUsername = "testuser",
+            developerName = "Test User",
+            professionalSummary = "A skilled developer.",
+            topSkills = listOf("Kotlin"),
+            totalPublicRepos = 10,
+            projectCount = 2,
+            createdAt = Instant.now()
+        )
+
+        `when`(portfolioGenerationService.listByUser(any())).thenReturn(listOf(summary))
+
+        val customUser = createCustomOAuth2User()
+
+        mockMvc.perform(
+            get("/api/v1/portfolio/my-portfolios")
+                .with(oauth2Login().oauth2User(customUser))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].githubUsername").value("testuser"))
+            .andExpect(jsonPath("$[0].projectCount").value(2))
+    }
+
+    @Test
+    fun `list my portfolios without auth redirects to login`() {
+        mockMvc.perform(get("/api/v1/portfolio/my-portfolios"))
+            .andExpect(status().is3xxRedirection)
+    }
+
+    @Test
+    fun `generate portfolio requires authentication`() {
+        mockMvc.perform(
+            post("/api/v1/portfolio/generate")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"githubUsername": "testuser"}""")
+        )
+            .andExpect(status().is3xxRedirection)
+    }
+
+    // --- Usage Limits ---
+
+    @Test
+    fun `generate portfolio returns 403 when usage limit exceeded`() {
+        val customUser = createCustomOAuth2User()
+
+        doThrow(UsageLimitExceededException("Monthly portfolio limit reached (3/3). Resets at 2026-03-01T00:00:00Z."))
+            .`when`(usageLimitService).checkPortfolioLimit(any())
+
+        mockMvc.perform(
+            post("/api/v1/portfolio/generate")
+                .with(oauth2Login().oauth2User(customUser))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"githubUsername": "testuser"}""")
+        )
+            .andExpect(status().isForbidden)
     }
 }

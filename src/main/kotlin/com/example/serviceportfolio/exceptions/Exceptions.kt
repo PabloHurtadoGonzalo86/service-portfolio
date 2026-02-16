@@ -14,3 +14,7 @@ class AiAnalysisException(message: String, cause: Throwable? = null) : RuntimeEx
 class ReadmeCommitException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
 class RateLimitExceededException(message: String) : RuntimeException(message)
+
+class AuthenticationRequiredException(message: String) : RuntimeException(message)
+
+class UsageLimitExceededException(message: String) : RuntimeException(message)
