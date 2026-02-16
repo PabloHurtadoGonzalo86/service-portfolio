@@ -4,6 +4,10 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.security.OAuthFlow
+import io.swagger.v3.oas.models.security.OAuthFlows
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,6 +17,22 @@ class OpenApiConfig {
 
     @Bean
     fun openApi(): OpenAPI = OpenAPI()
+        .addSecurityItem(SecurityRequirement().addList("github-oauth2"))
+        .components(
+            io.swagger.v3.oas.models.Components()
+                .addSecuritySchemes("github-oauth2",
+                    SecurityScheme()
+                        .type(SecurityScheme.Type.OAUTH2)
+                        .flows(
+                            OAuthFlows()
+                                .authorizationCode(
+                                    OAuthFlow()
+                                        .authorizationUrl("/oauth2/authorization/github")
+                                        .tokenUrl("https://github.com/login/oauth/access_token")
+                                )
+                        )
+                )
+        )
         .info(
             Info()
                 .title("Service Portfolio API")

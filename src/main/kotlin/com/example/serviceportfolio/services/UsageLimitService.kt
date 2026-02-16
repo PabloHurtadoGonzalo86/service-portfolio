@@ -5,6 +5,7 @@ import com.example.serviceportfolio.exceptions.UsageLimitExceededException
 import com.example.serviceportfolio.repositories.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.YearMonth
 import java.time.ZoneOffset
@@ -24,6 +25,36 @@ class UsageLimitService(
     }
 
     data class PlanLimits(val analyses: Int, val portfolios: Int)
+
+    @Transactional
+    fun checkAndIncrementAnalysis(user: User) {
+        resetIfNeeded(user)
+        val limits = PLAN_LIMITS[user.plan] ?: PLAN_LIMITS["FREE"]!!
+        if (user.analysesUsed >= limits.analyses) {
+            throw UsageLimitExceededException(
+                "Monthly analysis limit reached (${user.analysesUsed}/${limits.analyses}). " +
+                "Resets at ${user.usageResetAt}."
+            )
+        }
+        user.analysesUsed++
+        userRepository.save(user)
+        logger.debug("Analysis usage incremented for user {}: {}", user.githubUsername, user.analysesUsed)
+    }
+
+    @Transactional
+    fun checkAndIncrementPortfolio(user: User) {
+        resetIfNeeded(user)
+        val limits = PLAN_LIMITS[user.plan] ?: PLAN_LIMITS["FREE"]!!
+        if (user.portfoliosUsed >= limits.portfolios) {
+            throw UsageLimitExceededException(
+                "Monthly portfolio limit reached (${user.portfoliosUsed}/${limits.portfolios}). " +
+                "Resets at ${user.usageResetAt}."
+            )
+        }
+        user.portfoliosUsed++
+        userRepository.save(user)
+        logger.debug("Portfolio usage incremented for user {}: {}", user.githubUsername, user.portfoliosUsed)
+    }
 
     fun checkAnalysisLimit(user: User) {
         resetIfNeeded(user)
@@ -45,18 +76,6 @@ class UsageLimitService(
                 "Resets at ${user.usageResetAt}."
             )
         }
-    }
-
-    fun incrementAnalysisUsage(user: User) {
-        user.analysesUsed++
-        userRepository.save(user)
-        logger.debug("Analysis usage incremented for user {}: {}", user.githubUsername, user.analysesUsed)
-    }
-
-    fun incrementPortfolioUsage(user: User) {
-        user.portfoliosUsed++
-        userRepository.save(user)
-        logger.debug("Portfolio usage incremented for user {}: {}", user.githubUsername, user.portfoliosUsed)
     }
 
     private fun resetIfNeeded(user: User) {

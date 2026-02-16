@@ -14,8 +14,8 @@ class GitHubAppTokenService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private var cachedToken: String? = null
-    private var tokenExpiresAt: Instant? = null
+    @Volatile private var cachedToken: String? = null
+    @Volatile private var tokenExpiresAt: Instant? = null
 
     fun getInstallationToken(): String {
         // Si el token cacheado sigue valido (expira en mas de 5 min), devolverlo
@@ -28,6 +28,7 @@ class GitHubAppTokenService(
         return refreshToken()
     }
 
+    @Synchronized
     private fun refreshToken(): String {
         // Crear JWTTokenProvider: genera el JWT automaticamente a partir del appId + clave privada
         val jwtProvider = JWTTokenProvider(properties.appId.toString(), Path.of(properties.privateKeyPath))

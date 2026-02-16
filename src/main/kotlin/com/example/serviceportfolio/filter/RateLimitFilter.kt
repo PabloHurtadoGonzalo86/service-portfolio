@@ -83,14 +83,10 @@ class RateLimitFilter : OncePerRequestFilter() {
     }
 
     private fun getClientIp(request: HttpServletRequest): String {
-        val xForwardedFor = request.getHeader("X-Forwarded-For")
-        if (xForwardedFor != null) {
-            return xForwardedFor.split(",").first().trim()
-        }
         val xRealIp = request.getHeader("X-Real-IP")
-        if (xRealIp != null) {
-            return xRealIp
-        }
+        if (xRealIp != null) return xRealIp
+        val xForwardedFor = request.getHeader("X-Forwarded-For")
+        if (xForwardedFor != null) return xForwardedFor.split(",").last().trim()
         return request.remoteAddr
     }
 }

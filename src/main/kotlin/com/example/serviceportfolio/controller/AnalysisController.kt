@@ -80,7 +80,7 @@ class AnalysisController(
                 ).apply { user = currentUser }
                 val saved = analysisResultRepository.save(entity)
 
-                currentUser?.let { usageLimitService.incrementAnalysisUsage(it) }
+                currentUser?.let { usageLimitService.checkAndIncrementAnalysis(it) }
                 logger.info("Análisis guardado con id: {}", saved.id)
                 deferredResult.setResult(ResponseEntity.ok(saved.toResponse()))
             } catch (e: Exception) {
