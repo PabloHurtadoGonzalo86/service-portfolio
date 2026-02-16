@@ -3,6 +3,7 @@ package com.example.serviceportfolio.services
 import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
 import com.example.serviceportfolio.entities.Portfolio
+import com.example.serviceportfolio.entities.User
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.models.DeveloperPortfolio
 import com.example.serviceportfolio.repositories.PortfolioRepository
@@ -20,7 +21,7 @@ class PortfolioGenerationService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun generate(githubUsername: String): PortfolioResponse {
+    fun generate(githubUsername: String, user: User? = null): PortfolioResponse {
         logger.info("Generating portfolio for: {}", githubUsername)
 
         val existing = portfolioRepository.findFirstByGithubUsernameOrderByCreatedAtDesc(githubUsername)
@@ -41,7 +42,7 @@ class PortfolioGenerationService(
             githubUsername = githubUsername,
             portfolioData = objectMapper.writeValueAsString(portfolio),
             totalPublicRepos = repos.size
-        )
+        ).apply { this.user = user }
         val saved = portfolioRepository.save(entity)
 
         logger.info("Portfolio saved with id: {} for user: {}", saved.id, githubUsername)
@@ -53,6 +54,13 @@ class PortfolioGenerationService(
             .orElseThrow { RepoNotFoundException("Portfolio not found with id: $id") }
         val portfolio = objectMapper.readValue(entity.portfolioData, DeveloperPortfolio::class.java)
         return toResponse(entity, portfolio)
+    }
+
+    fun listByUser(user: User): List<PortfolioSummaryResponse> {
+        return portfolioRepository.findAllByUserOrderByCreatedAtDesc(user).map { entity ->
+            val portfolio = objectMapper.readValue(entity.portfolioData, DeveloperPortfolio::class.java)
+            toSummaryResponse(entity, portfolio)
+        }
     }
 
     fun listAll(): List<PortfolioSummaryResponse> {

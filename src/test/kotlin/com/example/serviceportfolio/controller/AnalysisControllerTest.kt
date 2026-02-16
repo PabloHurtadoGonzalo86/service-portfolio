@@ -3,9 +3,13 @@ package com.example.serviceportfolio.controller
 import com.example.serviceportfolio.config.AsyncConfig
 import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
+import com.example.serviceportfolio.entities.User
 import com.example.serviceportfolio.models.RepoAnalysis
 import com.example.serviceportfolio.models.RepoContext
 import com.example.serviceportfolio.repositories.AnalysisResultRepository
+import com.example.serviceportfolio.security.CustomOAuth2User
+import com.example.serviceportfolio.security.CustomOAuth2UserService
+import com.example.serviceportfolio.security.OAuth2LoginSuccessHandler
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
@@ -16,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
+import org.springframework.security.oauth2.core.user.OAuth2UserAuthority
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Client
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login
@@ -28,6 +34,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.Optional
+import java.util.UUID
 
 @WebMvcTest(AnalysisController::class)
 @Import(AsyncConfig::class)
@@ -47,6 +54,24 @@ class AnalysisControllerTest {
 
     @MockitoBean
     private lateinit var readmeCommitService: ReadmeCommitService
+
+    @MockitoBean
+    private lateinit var customOAuth2UserService: CustomOAuth2UserService
+
+    @MockitoBean
+    private lateinit var oAuth2LoginSuccessHandler: OAuth2LoginSuccessHandler
+
+    private fun createCustomOAuth2User(): CustomOAuth2User {
+        val user = User(
+            githubId = 12345L,
+            githubUsername = "testuser"
+        ).apply { id = UUID.fromString("00000000-0000-0000-0000-000000000001") }
+
+        val attributes = mapOf<String, Any>("id" to 12345L, "login" to "testuser")
+        val authority = OAuth2UserAuthority(attributes)
+        val delegate = DefaultOAuth2User(listOf(authority), attributes, "login")
+        return CustomOAuth2User(delegate, user)
+    }
 
     // --- POST /api/v1/repos/analyze ---
 
@@ -232,5 +257,37 @@ class AnalysisControllerTest {
                 .content("""{"repoUrl": "https://github.com/owner/repo", "readmeContent": "# README"}""")
         )
             .andExpect(status().is3xxRedirection) // Redirige al login de OAuth2
+    }
+
+    // --- GET /api/v1/repos/my-analyses ---
+
+    @Test
+    fun `list my analyses returns 200 with user analyses`() {
+        val entity = AnalysisResult(
+            repoUrl = "https://github.com/owner/repo",
+            projectName = "repo",
+            shortDescription = "desc",
+            techStack = listOf("Kotlin"),
+            detectedFeatures = listOf("API"),
+            readmeContent = "# Readme"
+        ).apply { id = 1L }
+
+        `when`(analysisResultRepository.findAllByUserOrderByCreatedAtDesc(any()))
+            .thenReturn(listOf(entity))
+
+        val customUser = createCustomOAuth2User()
+
+        mockMvc.perform(
+            get("/api/v1/repos/my-analyses")
+                .with(oauth2Login().oauth2User(customUser))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].projectName").value("repo"))
+    }
+
+    @Test
+    fun `list my analyses without auth redirects to login`() {
+        mockMvc.perform(get("/api/v1/repos/my-analyses"))
+            .andExpect(status().is3xxRedirection)
     }
 }
