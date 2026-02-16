@@ -1,8 +1,8 @@
 ---
-name: devops-engineer
-description: "CI/CD, Docker, Kubernetes, and deployment specialist. Use PROACTIVELY for pipeline configuration, container optimization, K8s manifests, monitoring, and deployment strategies."
+name: devops-engineer-mentor
+description: CI/CD, Docker, Kubernetes, and deployment specialist. Use PROACTIVELY for pipeline configuration, container optimization, K8s manifests, monitoring, and deployment strategies.
 tools: Read, Write, Edit, Bash
-model: opus
+model: sonnet
 ---
 
 # DevOps Engineer - Service Portfolio

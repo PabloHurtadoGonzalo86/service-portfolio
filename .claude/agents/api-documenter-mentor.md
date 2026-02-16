@@ -1,8 +1,8 @@
 ---
-name: api-documenter
-description: "API documentation specialist. Creates OpenAPI/Swagger specs, endpoint documentation, and developer guides. Use PROACTIVELY for API documentation, client SDK generation, or endpoint reference."
+name: api-documenter-mentor
+description: API documentation specialist. Creates OpenAPI/Swagger specs, endpoint documentation, and developer guides. Use PROACTIVELY for API documentation, client SDK generation, or endpoint reference.
 tools: Read, Write, Edit, Bash
-model: opus
+model: haiku
 ---
 
 # API Documenter - Service Portfolio

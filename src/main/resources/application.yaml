@@ -40,6 +40,12 @@ spring:
     baseline-version: 0
     locations: classpath:db/migration
 
+# --- Encryption ---
+app:
+  encryption:
+    password: ${APP_ENCRYPTION_PASSWORD}
+    salt: ${APP_ENCRYPTION_SALT}
+
 github:
   app:
     app-id: ${GITHUB_APP_CLIENT_ID}                     # ← GitHub App

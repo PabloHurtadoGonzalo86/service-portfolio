@@ -30,6 +30,10 @@ class AnalysisResult(
     @Column(nullable = false, columnDefinition = "text")
     var readmeContent: String = "",
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    var user: User? = null,
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     var createdAt: Instant = Instant.now(),
