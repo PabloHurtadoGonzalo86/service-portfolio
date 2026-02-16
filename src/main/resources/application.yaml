@@ -45,6 +45,8 @@ app:
   encryption:
     password: ${APP_ENCRYPTION_PASSWORD}
     salt: ${APP_ENCRYPTION_SALT}
+  oauth2:
+    success-redirect-url: ${APP_OAUTH2_SUCCESS_REDIRECT_URL:http://localhost:3000}
 
 github:
   app:

@@ -25,6 +25,8 @@ app:
   encryption:
     password: test-encryption-password
     salt: abcdef0123456789
+  oauth2:
+    success-redirect-url: http://localhost:3000
 
 github:
   app:
