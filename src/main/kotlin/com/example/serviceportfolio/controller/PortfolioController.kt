@@ -49,7 +49,7 @@ class PortfolioController(
         taskExecutor.execute {
             try {
                 val response = portfolioGenerationService.generate(request.githubUsername, currentUser)
-                currentUser?.let { usageLimitService.incrementPortfolioUsage(it) }
+                currentUser?.let { usageLimitService.checkAndIncrementPortfolio(it) }
                 deferredResult.setResult(ResponseEntity.ok(response))
             } catch (e: Exception) {
                 logger.error("Error generating portfolio for {}: {}", request.githubUsername, e.message)

@@ -89,30 +89,46 @@ class UsageLimitServiceTest {
         }
     }
 
-    // --- incrementAnalysisUsage ---
+    // --- checkAndIncrementAnalysis ---
 
     @Test
-    fun `incrementAnalysisUsage increments counter and saves`() {
+    fun `checkAndIncrementAnalysis increments counter and saves`() {
         val user = createUser(analysesUsed = 2)
         `when`(userRepository.save(any<User>())).thenReturn(user)
 
-        usageLimitService.incrementAnalysisUsage(user)
+        usageLimitService.checkAndIncrementAnalysis(user)
 
         assertEquals(3, user.analysesUsed)
         verify(userRepository).save(user)
     }
 
-    // --- incrementPortfolioUsage ---
+    @Test
+    fun `checkAndIncrementAnalysis throws when at limit`() {
+        val user = createUser(analysesUsed = 5)
+        assertThrows(UsageLimitExceededException::class.java) {
+            usageLimitService.checkAndIncrementAnalysis(user)
+        }
+    }
+
+    // --- checkAndIncrementPortfolio ---
 
     @Test
-    fun `incrementPortfolioUsage increments counter and saves`() {
+    fun `checkAndIncrementPortfolio increments counter and saves`() {
         val user = createUser(portfoliosUsed = 1)
         `when`(userRepository.save(any<User>())).thenReturn(user)
 
-        usageLimitService.incrementPortfolioUsage(user)
+        usageLimitService.checkAndIncrementPortfolio(user)
 
         assertEquals(2, user.portfoliosUsed)
         verify(userRepository).save(user)
+    }
+
+    @Test
+    fun `checkAndIncrementPortfolio throws when at limit`() {
+        val user = createUser(portfoliosUsed = 3)
+        assertThrows(UsageLimitExceededException::class.java) {
+            usageLimitService.checkAndIncrementPortfolio(user)
+        }
     }
 
     // --- resetIfNeeded ---
