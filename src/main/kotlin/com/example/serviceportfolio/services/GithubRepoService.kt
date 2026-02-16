@@ -136,7 +136,7 @@ class GitHubRepoService(
 
             return user.getRepositories()
                 .values
-                .filter { !it.isArchived && !it.isFork }
+                .filter { !it.isArchived && !it.isFork && it.size > 0 }
                 .sortedByDescending { it.pushedAt }
                 .take(MAX_REPOS_FOR_PORTFOLIO)
                 .map { repo ->
@@ -144,8 +144,10 @@ class GitHubRepoService(
                         name = repo.name,
                         description = repo.description,
                         primaryLanguage = repo.language,
+                        languages = repo.listLanguages(),
                         stars = repo.stargazersCount,
                         forks = repo.forksCount,
+                        sizeKb = repo.size,
                         url = repo.htmlUrl.toString()
                     )
                 }
