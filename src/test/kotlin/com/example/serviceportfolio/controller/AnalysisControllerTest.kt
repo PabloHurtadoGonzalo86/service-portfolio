@@ -249,6 +249,17 @@ class AnalysisControllerTest {
     }
 
     @Test
+    fun `analyze repo requires authentication`() {
+        mockMvc.perform(
+            post("/api/v1/repos/analyze")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"repoUrl": "https://github.com/owner/repo"}""")
+        )
+            .andExpect(status().is3xxRedirection)
+    }
+
+    @Test
     fun `commit readme requires authentication`() {
         mockMvc.perform(
             post("/api/v1/repos/readme/commit")

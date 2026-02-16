@@ -260,4 +260,15 @@ class PortfolioControllerTest {
         mockMvc.perform(get("/api/v1/portfolio/my-portfolios"))
             .andExpect(status().is3xxRedirection)
     }
+
+    @Test
+    fun `generate portfolio requires authentication`() {
+        mockMvc.perform(
+            post("/api/v1/portfolio/generate")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"githubUsername": "testuser"}""")
+        )
+            .andExpect(status().is3xxRedirection)
+    }
 }
