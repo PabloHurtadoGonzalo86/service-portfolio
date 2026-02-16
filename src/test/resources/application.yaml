@@ -21,6 +21,11 @@ spring:
     openai:
       api-key: test-key
 
+app:
+  encryption:
+    password: test-encryption-password
+    salt: abcdef0123456789
+
 github:
   app:
     app-id: 12345

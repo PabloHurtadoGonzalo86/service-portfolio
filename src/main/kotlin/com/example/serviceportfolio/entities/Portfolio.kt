@@ -17,6 +17,10 @@ class Portfolio(
     @Column(nullable = false)
     var totalPublicRepos: Int = 0,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    var user: User? = null,
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     var createdAt: Instant = Instant.now(),
