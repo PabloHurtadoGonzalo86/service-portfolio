@@ -163,6 +163,8 @@ class AiAnalysisService(
         appendLine("   - El tono debe ser profesional, tecnico y atractivo para un recruiter")
         appendLine()
         appendLine("3. **selectedProjects**: Selecciona los 6-10 repositorios mas representativos e interesantes.")
+        appendLine("   - NUNCA selecciones repos con tamano menor a 10 KB, ya que probablemente solo contienen boilerplate o estan practicamente vacios")
+        appendLine("   - Prioriza repos con mayor tamano, mas lenguajes, y descripciones claras")
         appendLine("   - Prioriza DIVERSIDAD tecnologica (no elegir 5 proyectos del mismo stack)")
         appendLine("   - Para cada proyecto:")
         appendLine("     - **repoName**: Nombre exacto del repositorio (tal como aparece abajo)")
@@ -189,7 +191,15 @@ class AiAnalysisService(
         repos.forEachIndexed { index, repo ->
             appendLine("### ${index + 1}. ${repo.name}")
             appendLine("- URL: ${repo.url}")
+            appendLine("- Tamano: ${repo.sizeKb} KB")
             appendLine("- Lenguaje principal: ${repo.primaryLanguage ?: "No especificado"}")
+            if (repo.languages.isNotEmpty()) {
+                val total = repo.languages.values.sum().toDouble()
+                val langBreakdown = repo.languages.entries
+                    .sortedByDescending { it.value }
+                    .joinToString(", ") { (lang, bytes) -> "$lang ${(bytes / total * 100).toInt()}%" }
+                appendLine("- Lenguajes: $langBreakdown")
+            }
             appendLine("- Stars: ${repo.stars} | Forks: ${repo.forks}")
             if (repo.description != null) {
                 appendLine("- Descripcion: ${repo.description}")
