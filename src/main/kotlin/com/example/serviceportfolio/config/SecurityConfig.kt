@@ -5,12 +5,8 @@ import com.example.serviceportfolio.security.OAuth2LoginSuccessHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
@@ -25,14 +21,6 @@ class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val oAuth2LoginSuccessHandler: OAuth2LoginSuccessHandler
 ) {
-
-    @Bean
-    fun authorizedClientService(
-        jdbcTemplate: JdbcTemplate,
-        clientRegistrationRepository: ClientRegistrationRepository
-    ): OAuth2AuthorizedClientService {
-        return JdbcOAuth2AuthorizedClientService(jdbcTemplate, clientRegistrationRepository)
-    }
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {

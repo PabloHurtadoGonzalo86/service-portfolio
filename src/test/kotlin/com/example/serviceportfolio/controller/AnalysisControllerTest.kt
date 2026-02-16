@@ -14,6 +14,7 @@ import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
 import com.example.serviceportfolio.services.UsageLimitService
+import com.example.serviceportfolio.util.TokenEncryptor
 import com.example.serviceportfolio.exceptions.UsageLimitExceededException
 import org.mockito.kotlin.doThrow
 import org.junit.jupiter.api.Test
@@ -29,7 +30,6 @@ import org.springframework.http.MediaType
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Client
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
@@ -66,6 +66,9 @@ class AnalysisControllerTest {
 
     @MockitoBean
     private lateinit var usageLimitService: UsageLimitService
+
+    @MockitoBean
+    private lateinit var tokenEncryptor: TokenEncryptor
 
     @MockitoBean
     private lateinit var customOAuth2UserService: CustomOAuth2UserService
@@ -227,17 +230,20 @@ class AnalysisControllerTest {
 
     @Test
     fun `commit readme returns 200 with commit response`() {
+        val customUser = createCustomOAuth2User()
+        customUser.user.githubAccessToken = "encrypted-token"
+
         val commitResponse = ReadmeCommitResponse(
             commitSha = "abc123def456",
             commitUrl = "https://github.com/owner/repo/commit/abc123def456"
         )
 
+        `when`(tokenEncryptor.decrypt("encrypted-token")).thenReturn("plain-token")
         `when`(readmeCommitService.commitReadme(any(), any(), any())).thenReturn(commitResponse)
 
         mockMvc.perform(
             post("/api/v1/repos/readme/commit")
-                .with(oauth2Login())
-                .with(oauth2Client("github"))
+                .with(oauth2Login().oauth2User(customUser))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"repoUrl": "https://github.com/owner/repo", "readmeContent": "# My README"}""")
@@ -252,12 +258,28 @@ class AnalysisControllerTest {
         mockMvc.perform(
             post("/api/v1/repos/readme/commit")
                 .with(oauth2Login())
-                .with(oauth2Client("github"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{"repoUrl": "https://github.com/owner/repo", "readmeContent": ""}""")
         )
             .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `commit readme returns 401 when token not available`() {
+        val customUser = createCustomOAuth2User()
+        customUser.user.githubAccessToken = null
+
+        `when`(tokenEncryptor.decrypt(null)).thenReturn(null)
+
+        mockMvc.perform(
+            post("/api/v1/repos/readme/commit")
+                .with(oauth2Login().oauth2User(customUser))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"repoUrl": "https://github.com/owner/repo", "readmeContent": "# README"}""")
+        )
+            .andExpect(status().isUnauthorized)
     }
 
     @Test

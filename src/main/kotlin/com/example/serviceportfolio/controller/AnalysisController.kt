@@ -5,9 +5,11 @@ import com.example.serviceportfolio.dtos.AnalyzeRepoRequest
 import com.example.serviceportfolio.dtos.ReadmeCommitRequest
 import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
+import com.example.serviceportfolio.exceptions.AuthenticationRequiredException
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.repositories.AnalysisResultRepository
 import com.example.serviceportfolio.security.SecurityUtils
+import com.example.serviceportfolio.util.TokenEncryptor
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
@@ -20,8 +22,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.request.async.DeferredResult
 
@@ -34,6 +34,7 @@ class AnalysisController(
     private val analysisResultRepository: AnalysisResultRepository,
     private val readmeCommitService: ReadmeCommitService,
     private val usageLimitService: UsageLimitService,
+    private val tokenEncryptor: TokenEncryptor,
     @Qualifier("aiTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
 ) {
 
@@ -124,12 +125,13 @@ class AnalysisController(
     @ApiResponse(responseCode = "502", description = "GitHub API error during commit")
     @PostMapping("/readme/commit")
     fun commitReadme(
-        @Valid @RequestBody request: ReadmeCommitRequest,
-        @RegisteredOAuth2AuthorizedClient("github") authorizedClient: OAuth2AuthorizedClient
+        @Valid @RequestBody request: ReadmeCommitRequest
     ): ResponseEntity<ReadmeCommitResponse> {
         logger.info("Solicitud de commit de README recibida para: {}", request.repoUrl)
 
-        val token = authorizedClient.accessToken.tokenValue
+        val user = SecurityUtils.requireCurrentUser()
+        val token = tokenEncryptor.decrypt(user.githubAccessToken)
+            ?: throw AuthenticationRequiredException("GitHub token not available. Please re-login.")
         val response = readmeCommitService.commitReadme(request.repoUrl, request.readmeContent, token)
 
         logger.info("README committed exitosamente, sha: {}", response.commitSha)
