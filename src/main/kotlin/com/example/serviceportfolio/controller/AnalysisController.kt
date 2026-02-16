@@ -7,6 +7,7 @@ import com.example.serviceportfolio.dtos.ReadmeCommitResponse
 import com.example.serviceportfolio.entities.AnalysisResult
 import com.example.serviceportfolio.exceptions.RepoNotFoundException
 import com.example.serviceportfolio.repositories.AnalysisResultRepository
+import com.example.serviceportfolio.security.SecurityUtils
 import com.example.serviceportfolio.services.AiAnalysisService
 import com.example.serviceportfolio.services.GitHubRepoService
 import com.example.serviceportfolio.services.ReadmeCommitService
@@ -43,6 +44,7 @@ class AnalysisController(
     @PostMapping("/analyze")
     fun analyzeRepo(@Valid @RequestBody request: AnalyzeRepoRequest): DeferredResult<ResponseEntity<AnalysisResponse>> {
         logger.info("Solicitud de análisis recibida para: {}", request.repoUrl)
+        val currentUser = SecurityUtils.getCurrentUser()
 
         val deferredResult = DeferredResult<ResponseEntity<AnalysisResponse>>(120_000L)
         deferredResult.onTimeout {
@@ -71,7 +73,7 @@ class AnalysisController(
                     techStack = analysis.techStack,
                     detectedFeatures = analysis.detectedFeatures,
                     readmeContent = analysis.readmeMarkdown
-                )
+                ).apply { user = currentUser }
                 val saved = analysisResultRepository.save(entity)
 
                 logger.info("Análisis guardado con id: {}", saved.id)
@@ -100,6 +102,16 @@ class AnalysisController(
         val result = analysisResultRepository.findById(id)
             .orElseThrow { RepoNotFoundException("Analysis not found with id: $id") }
         return ResponseEntity.ok(result.toResponse())
+    }
+
+    @Operation(summary = "List my analyses", description = "Returns analyses owned by the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Analyses returned")
+    @ApiResponse(responseCode = "401", description = "Not authenticated")
+    @GetMapping("/my-analyses")
+    fun listMyAnalyses(): ResponseEntity<List<AnalysisResponse>> {
+        val user = SecurityUtils.requireCurrentUser()
+        val results = analysisResultRepository.findAllByUserOrderByCreatedAtDesc(user)
+        return ResponseEntity.ok(results.map { it.toResponse() })
     }
 
     @Operation(summary = "Commit README to repository", description = "Commits a generated README directly to the user's GitHub repository. Requires OAuth authentication.")

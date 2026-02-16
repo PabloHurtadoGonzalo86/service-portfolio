@@ -3,6 +3,7 @@ package com.example.serviceportfolio.controller
 import com.example.serviceportfolio.dtos.GeneratePortfolioRequest
 import com.example.serviceportfolio.dtos.PortfolioResponse
 import com.example.serviceportfolio.dtos.PortfolioSummaryResponse
+import com.example.serviceportfolio.security.SecurityUtils
 import com.example.serviceportfolio.services.PortfolioGenerationService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -32,6 +33,7 @@ class PortfolioController(
     @PostMapping("/generate")
     fun generatePortfolio(@Valid @RequestBody request: GeneratePortfolioRequest): DeferredResult<ResponseEntity<PortfolioResponse>> {
         logger.info("Portfolio generation requested for: {}", request.githubUsername)
+        val currentUser = SecurityUtils.getCurrentUser()
 
         val deferredResult = DeferredResult<ResponseEntity<PortfolioResponse>>(120_000L)
         deferredResult.onTimeout {
@@ -43,7 +45,7 @@ class PortfolioController(
 
         taskExecutor.execute {
             try {
-                val response = portfolioGenerationService.generate(request.githubUsername)
+                val response = portfolioGenerationService.generate(request.githubUsername, currentUser)
                 deferredResult.setResult(ResponseEntity.ok(response))
             } catch (e: Exception) {
                 logger.error("Error generating portfolio for {}: {}", request.githubUsername, e.message)
@@ -67,6 +69,16 @@ class PortfolioController(
     @GetMapping
     fun listPortfolios(): ResponseEntity<List<PortfolioSummaryResponse>> {
         val response = portfolioGenerationService.listAll()
+        return ResponseEntity.ok(response)
+    }
+
+    @Operation(summary = "List my portfolios", description = "Returns portfolios owned by the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Portfolios returned")
+    @ApiResponse(responseCode = "401", description = "Not authenticated")
+    @GetMapping("/my-portfolios")
+    fun listMyPortfolios(): ResponseEntity<List<PortfolioSummaryResponse>> {
+        val user = SecurityUtils.requireCurrentUser()
+        val response = portfolioGenerationService.listByUser(user)
         return ResponseEntity.ok(response)
     }
 }
