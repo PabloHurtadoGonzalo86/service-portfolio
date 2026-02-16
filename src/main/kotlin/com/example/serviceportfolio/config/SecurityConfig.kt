@@ -1,5 +1,7 @@
 package com.example.serviceportfolio.config
 
+import com.example.serviceportfolio.security.CustomOAuth2UserService
+import com.example.serviceportfolio.security.OAuth2LoginSuccessHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,7 +21,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig(
     @Value("\${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
-    private val allowedOrigins: List<String>
+    private val allowedOrigins: List<String>,
+    private val customOAuth2UserService: CustomOAuth2UserService,
+    private val oAuth2LoginSuccessHandler: OAuth2LoginSuccessHandler
 ) {
 
     @Bean
@@ -45,7 +49,10 @@ class SecurityConfig(
                     .requestMatchers("/").permitAll()
                     .anyRequest().authenticated()
             }
-            .oauth2Login { }
+            .oauth2Login { oauth2 ->
+                oauth2.userInfoEndpoint { it.userService(customOAuth2UserService) }
+                oauth2.successHandler(oAuth2LoginSuccessHandler)
+            }
             .csrf { it.disable() }
         return http.build()
     }
