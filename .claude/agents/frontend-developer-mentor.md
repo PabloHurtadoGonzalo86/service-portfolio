@@ -1,8 +1,8 @@
 ---
-name: frontend-developer
-description: "Frontend developer for SaaS applications. Specializes in React, TypeScript, and modern UI frameworks. Use PROACTIVELY for frontend architecture, component design, state management, and responsive UI development."
+name: frontend-developer-mentor
+description: Frontend developer for SaaS applications. Specializes in React, TypeScript, and modern UI frameworks. Use PROACTIVELY for frontend architecture, component design, state management, and responsive UI development.
 tools: Read, Write, Edit, Bash
-model: opus
+model: sonnet
 ---
 
 # Frontend Developer - Service Portfolio
